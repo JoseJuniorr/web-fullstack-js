@@ -1,4 +1,3 @@
-import { Response } from "express";
 import supertest from "supertest";
 import app from "./../src/app";
 
@@ -40,7 +39,6 @@ describe("testando rotas do accounts-service", () => {
 
   it("PATCH /accounts/:id - Deve retornar statusCode 200", async () => {
     const payload = {
-      
       name: "Jose Junior",
       email: "jjerrorama2@gmail.com",
       password: "123654",
