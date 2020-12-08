@@ -1,7 +1,11 @@
 import { Request, Response } from "express";
 import Joi from "joi";
 
-import { accountSchema, loginSchema } from "../models/account";
+import {
+  accountSchema,
+  loginSchema,
+  accountUpdateSchema,
+} from "../models/accountSchemas";
 
 function validateSchema(
   schema: Joi.ObjectSchema<any>,
@@ -26,4 +30,8 @@ function validateLogin(req: Request, res: Response, next: any) {
   return validateSchema(loginSchema, req, res, next);
 }
 
-export { validateAccount, validateLogin };
+function validateUpdateAccount(req: Request, res: Response, next: any) {
+  return validateSchema(accountUpdateSchema, req, res, next);
+}
+
+export { validateAccount, validateLogin, validateUpdateAccount };
