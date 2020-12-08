@@ -6,22 +6,25 @@ import {
   validateAccount,
   validateLogin,
   validateUpdateAccount,
+  validateAuth
 } from "./middlewares";
 
 const router = Router();
 
-router.get("/", accountsController.getAccounts);
+router.get("/", validateAuth, accountsController.getAccounts);
 
-router.get("/:id", accountsController.getAccountById);
+router.get("/:id", validateAuth, accountsController.getAccountById);
 
-router.post("/", validateAccount, accountsController.addAccount);
+router.patch("/:id", validateAuth, validateUpdateAccount, accountsController.setAccount);
 
-router.patch("/:id", validateUpdateAccount, accountsController.setAccount);
+router.post("/",  validateAccount, accountsController.addAccount);
+
+
 
 //Auth routes
 
 router.post("/login", validateLogin, accountsController.loginAccount);
 
-router.post("/logout", accountsController.logoutAccount);
+router.post("/logout", validateAuth, accountsController.logoutAccount);
 
 export default router;
