@@ -7,6 +7,7 @@ export interface IAccount {
   email: string;
   password: string;
   status: AccountStatus;
+  domain: string
 }
 
 const accountSchema = Joi.object({
