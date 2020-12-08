@@ -2,7 +2,11 @@ import { Router } from "express";
 
 import accountsController from "../controllers/accounts";
 
-import { validateAccount, validateLogin } from "./middlewares";
+import {
+  validateAccount,
+  validateLogin,
+  validateUpdateAccount,
+} from "./middlewares";
 
 const router = Router();
 
@@ -12,7 +16,7 @@ router.get("/:id", accountsController.getAccountById);
 
 router.post("/", validateAccount, accountsController.addAccount);
 
-router.patch("/:id", validateAccount, accountsController.setAccount);
+router.patch("/:id", validateUpdateAccount, accountsController.setAccount);
 
 //Auth routes
 
