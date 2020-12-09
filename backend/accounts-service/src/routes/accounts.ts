@@ -3,10 +3,10 @@ import { Router } from "express";
 import accountsController from "../controllers/accounts";
 
 import {
-  validateAccount,
-  validateLogin,
-  validateUpdateAccount,
-  validateAuth
+  validateAccountSchema,
+  validateAuth,
+  validateLoginSchema,
+  validateUpdateAccountSchema,
 } from "./middlewares";
 
 const router = Router();
@@ -15,16 +15,19 @@ router.get("/", validateAuth, accountsController.getAccounts);
 
 router.get("/:id", validateAuth, accountsController.getAccountById);
 
-router.patch("/:id", validateAuth, validateUpdateAccount, accountsController.setAccount);
+router.patch(
+  "/:id",
+  validateAuth,
+  validateUpdateAccountSchema,
+  accountsController.setAccount
+);
 
-router.post("/",  validateAccount, accountsController.addAccount);
-
-
+router.post("/", validateAccountSchema, accountsController.addAccount);
 
 //Auth routes
 
-router.post("/login", validateLogin, accountsController.loginAccount);
+router.post("/login", validateLoginSchema, accountsController.loginAccount);
 
-router.post("/logout", validateAuth, accountsController.logoutAccount);
+router.post("/logout", accountsController.logoutAccount);
 
 export default router;
