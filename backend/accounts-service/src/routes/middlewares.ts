@@ -24,14 +24,14 @@ function validateSchema(
   res.status(422).end();
 }
 
-function validateAccount(req: Request, res: Response, next: any) {
+function validateAccountSchema(req: Request, res: Response, next: any) {
   return validateSchema(accountSchema, req, res, next);
 }
-function validateLogin(req: Request, res: Response, next: any) {
+function validateLoginSchema(req: Request, res: Response, next: any) {
   return validateSchema(loginSchema, req, res, next);
 }
 
-function validateUpdateAccount(req: Request, res: Response, next: any) {
+function validateUpdateAccountSchema(req: Request, res: Response, next: any) {
   return validateSchema(accountUpdateSchema, req, res, next);
 }
 
@@ -52,4 +52,9 @@ async function validateAuth(req: Request, res: Response, next: any) {
   }
 }
 
-export { validateAccount, validateLogin, validateUpdateAccount, validateAuth };
+export {
+  validateAccountSchema,
+  validateLoginSchema,
+  validateUpdateAccountSchema,
+  validateAuth,
+};
