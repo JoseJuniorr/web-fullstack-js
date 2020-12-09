@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 
 import { IAccount } from "./../models/account";
-import repository from "../models/accountModel";
+import repository from "../models/accountRepository";
 import auth from "../auth";
 
 const accounts: IAccount[] = [];
@@ -56,12 +56,16 @@ async function setAccount(req: Request, res: Response, next: any) {
     const accountId = parseInt(req.params.id);
     if (!accountId) throw new Error("ID is invalid format.");
     const accountParams = req.body as IAccount;
-    accountParams.password = auth.hashPassword(accountParams.password);
+
+    if (accountParams.password)
+      accountParams.password = auth.hashPassword(accountParams.password);
 
     const updatedAccount = await repository.set(accountId, accountParams);
-    updatedAccount!.password = "";
+    if (updatedAccount != null) {
+      updatedAccount.password = "";
 
-    res.status(200).json(updatedAccount);
+      res.status(200).json(updatedAccount);
+    } else res.status(404).end();
   } catch (error) {
     console.log(`setAccount: ${error}`);
     res.status(400).end();
