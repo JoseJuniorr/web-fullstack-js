@@ -13,9 +13,9 @@ import {
 
 const router = Router();
 
-router.get("/", validateAuth, accountsController.getAccounts);
+router.get("/accounts", validateAuth, accountsController.getAccounts);
 
-router.get("/:id", validateAuth, accountsController.getAccountById);
+router.get("/accounts/:id", validateAuth, accountsController.getAccountById);
 
 router.patch(
   "/:id",
@@ -24,12 +24,12 @@ router.patch(
   accountsController.setAccount
 );
 
-router.post("/", validateAccountSchema, accountsController.addAccount);
+router.post("/accounts/", validateAccountSchema, accountsController.addAccount);
 
 //Auth routes
 
-router.post("/login", validateLoginSchema, accountsController.loginAccount);
+router.post("/accounts/login", validateLoginSchema, accountsController.loginAccount);
 
-router.post("/logout", accountsController.logoutAccount);
+router.post("/accounts/logout", accountsController.logoutAccount);
 
 export default router;
