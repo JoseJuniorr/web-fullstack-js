@@ -1,10 +1,11 @@
+import { Token } from "ms-commons/api/auth";
+import controllerCommons from "ms-commons/api/controllers/controller";
+
 import { Request, Response } from "express";
 
 import { IAccount } from "./../models/account";
 import repository from "../models/accountRepository";
 import auth from "../auth";
-
-
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const accounts: IAccount[] = await repository.findAll();
@@ -21,6 +22,9 @@ async function getAccountById(req: Request, res: Response, next: any) {
   try {
     const id = parseInt(req.params.id);
     if (!id) throw new Error("ID invalid format");
+
+    // const token = controllerCommons.getToken(res) as Token;
+    // if (id !== token.accountId) return res.status(403).end();
 
     const account = await repository.findById(id);
 
@@ -56,6 +60,9 @@ async function setAccount(req: Request, res: Response, next: any) {
     const accountId = parseInt(req.params.id);
     if (!accountId) throw new Error("ID is invalid format.");
     const accountParams = req.body as IAccount;
+
+    // const token = controllerCommons.getToken(res) as Token;
+    // if (accountId !== token.accountId) return res.status(403).end();
 
     if (accountParams.password)
       accountParams.password = auth.hashPassword(accountParams.password);
@@ -100,6 +107,23 @@ function logoutAccount(req: Request, res: Response, next: any) {
   res.json({ auth: false, token: null });
 }
 
+async function deleteAccount(req: Request, res: Response, next: any) {
+  try {
+    const accountId = parseInt(req.params.id);
+    if (!accountId) return res.status(400).end();
+
+    // const token = controllerCommons.getToken(res) as Token;
+    // if (accountId !== token.accountId) return res.status(403).end();
+
+    await repository.remove(accountId);
+    res.status(200).end();
+
+  } catch (error) {
+    console.log(`deleteAccount: ${error}`);
+    res.status(400).end();
+  }
+}
+
 export default {
   getAccounts,
   addAccount,
@@ -107,4 +131,5 @@ export default {
   setAccount,
   loginAccount,
   logoutAccount,
+  deleteAccount,
 };

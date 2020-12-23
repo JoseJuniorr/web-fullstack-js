@@ -2,24 +2,24 @@ import { Router } from "express";
 
 import accountsController from "../controllers/accounts";
 
-
-
 import {
   validateAccountSchema,
-  validateAuth,
+  validateAuthentication,
   validateLoginSchema,
   validateUpdateAccountSchema,
+  validateAuthorization
 } from "./middlewares";
 
 const router = Router();
 
-router.get("/accounts", validateAuth, accountsController.getAccounts);
+router.get("/accounts", validateAuthentication, accountsController.getAccounts);
 
-router.get("/accounts/:id", validateAuth, accountsController.getAccountById);
+router.get("/accounts/:id", validateAuthentication, validateAuthorization, accountsController.getAccountById);
 
 router.patch(
-  "/:id",
-  validateAuth,
+  "/accounts/:id",
+  validateAuthentication,
+  validateAuthorization,
   validateUpdateAccountSchema,
   accountsController.setAccount
 );
@@ -28,8 +28,14 @@ router.post("/accounts/", validateAccountSchema, accountsController.addAccount);
 
 //Auth routes
 
-router.post("/accounts/login", validateLoginSchema, accountsController.loginAccount);
+router.post(
+  "/accounts/login",
+  validateLoginSchema,
+  accountsController.loginAccount
+);
 
-router.post("/accounts/logout", accountsController.logoutAccount);
+router.post("/accounts/logout", validateAuthentication, accountsController.logoutAccount);
+
+ router.delete("/accounts/:id", validateAuthentication, validateAuthorization, accountsController.deleteAccount);
 
 export default router;

@@ -1,6 +1,7 @@
 import supertest from "supertest";
 import app from ".././src/app";
 import { IAccount } from "../src/models/account";
+import auth from "../src/auth";
 
 import repository from "../src/models/accountRepository";
 
@@ -8,6 +9,11 @@ const testEmail = "jest@gmail.com";
 const hashPassword =
   "$2a$10$xPMrrzxd7w4doT5bQM7cMOVpZ3vTpo8Pag2qF8xO5m17tPVk1GQR6"; //123654
 const testPassword = "123654";
+
+let jwt: string = "";
+let testId: number = 0;
+
+let testAccountId = 0;
 
 beforeAll(async () => {
   const testAccount: IAccount = {
@@ -17,7 +23,11 @@ beforeAll(async () => {
     domain: "jest.com",
   };
 
-  await repository.addAccount(testAccount);
+  const result = await repository.addAccount(testAccount);
+  testId = result.id!;
+  testAccountId = result.id!;
+  jwt = auth.sign(testAccountId);
+  
 });
 
 afterAll(async () => {
@@ -57,8 +67,7 @@ describe("Testando rotas de autenticação", () => {
   it("POST /accounts/login - 422 Unprocessable Entity", async () => {
     const payload = {
       email: testEmail,
-      password: ''
-      
+      password: "",
     };
 
     const resultado = await supertest(app)
@@ -69,7 +78,9 @@ describe("Testando rotas de autenticação", () => {
   });
 
   it("POST  /accounts/logout - 200 OK", async () => {
-    const resultado = await supertest(app).post("/accounts/logout");
+    const resultado = await supertest(app)
+      .post("/accounts/logout")
+      .set("x-access-token", jwt);
 
     expect(resultado.status).toEqual(200);
   });

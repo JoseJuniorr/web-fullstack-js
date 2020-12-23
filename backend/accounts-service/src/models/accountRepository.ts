@@ -33,11 +33,12 @@ async function set(id: number, account: IAccount) {
   return null;
 }
 
-function remove(id: string) {
+function remove(id: number) {
   return accountModel.destroy({
     where: { id: id },
   } as DestroyOptions<IAccount>);
 }
+
 function removeByEmail(email: string) {
   return accountModel.destroy({
     where: { email: email },
