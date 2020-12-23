@@ -11,7 +11,6 @@ const hashPassword =
 const testPassword = "123654";
 
 let jwt: string = "";
-let testId: number = 0;
 
 let testAccountId = 0;
 
@@ -24,10 +23,9 @@ beforeAll(async () => {
   };
 
   const result = await repository.addAccount(testAccount);
-  testId = result.id!;
+
   testAccountId = result.id!;
   jwt = auth.sign(testAccountId);
-  
 });
 
 afterAll(async () => {

@@ -1,2 +1,5 @@
-# web-fullstack-js
-Repositório do curso web full stack js Luiz tools.
+# MailShrimp - Full Stack JS
+
+## Aplicação em micro serviços, plataforma e-mail marketing
+
+Isso é tudo por enquanto
