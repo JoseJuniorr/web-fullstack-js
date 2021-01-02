@@ -33,10 +33,10 @@ class ContactsAdd extends React.Component {
 
         await service.add({ name, email, phone });
 
-        this.props.push("/contacts");
+        this.props.history.push("/contacts");
       } catch (error) {
         this.setState({
-          error: "Ocorreu um erro durante a criação do contato",
+          error: "Ocorreu um erro ao criar o contato",
         });
       }
     }
@@ -56,7 +56,7 @@ class ContactsAdd extends React.Component {
             <Row>
               <Col>
                 <h3>Adicionar Contato</h3>
-                <p>Informe todos os campos para adicionar um contato:</p>
+                <p>Informe todos os campos para adicionar um contato</p>
               </Col>
             </Row>
             <Row>
