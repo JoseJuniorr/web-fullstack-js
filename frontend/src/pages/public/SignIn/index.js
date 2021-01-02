@@ -3,11 +3,11 @@ import { Button, Form, Container, Row, Col } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
 
 import Logo from "../../../assets/mail-send.svg";
-import api from "../../../services/api";
+import AccountsService from "../../../services/accounts";
 
 import { login } from "../../../services/auth";
 
-import { BoxForm, BoxContent } from "./styles";
+import { BoxForm, BoxContent } from "../../../shared/styles";
 
 class SignIn extends React.Component {
   state = {
@@ -25,10 +25,9 @@ class SignIn extends React.Component {
       this.setState({ error: "Informe todos os campos para acessar!" });
     } else {
       try {
-        const response = await api.post("accounts/login", {
-          email,
-          password,
-        });
+        const service = new AccountsService();
+
+        const response = await service.login(email, password);
 
         login(response.data.token);
         this.props.history.push("/");

@@ -1,12 +1,11 @@
 import React from "react";
-
-import api from "../../../services/api";
+import AccountsService from "../../../services/accounts";
 
 import { Container, Form, Button, Row, Col, Alert } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
 
 import Logo from "../../../assets/mail-send.svg";
-import { BoxContent, BoxForm } from "./styles";
+import { BoxContent, BoxForm } from "../../../shared/styles";
 
 class SignUp extends React.Component {
   state = {
@@ -26,7 +25,9 @@ class SignUp extends React.Component {
       this.setState({ error: "Informe todos os campos para se cadastrar!" });
     } else {
       try {
-        await api.post("accounts", { name, email, password, domain });
+        const service = new AccountsService();
+
+        await service.signup({ name, email, password, domain });
         this.props.history.push("/signin");
       } catch (error) {
         console.log(error);
