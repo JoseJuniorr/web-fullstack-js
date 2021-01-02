@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Container, Row, Col } from "react-bootstrap";
+import { Button, Form, Container, Row, Col, Alert } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
 
 import Logo from "../../../assets/mail-send.svg";
@@ -40,6 +40,11 @@ class SignIn extends React.Component {
     }
   };
 
+  renderError = () => {
+    const { error } = this.state;
+    return <Alert variant="danger">{error}</Alert>;
+  };
+
   render() {
     return (
       <Container>
@@ -56,6 +61,7 @@ class SignIn extends React.Component {
               <h2>Login</h2>
               <p>Informe seus dados para se autenticar</p>
               <Form onSubmit={this.handleSignIn}>
+                {this.state.error && this.renderError()}
                 <Form.Group controlId="emailGroup">
                   <Form.Control
                     type="email"
