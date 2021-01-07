@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import jwt, { VerifyOptions } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import fs from "fs";
 import authCommons, { Token } from "ms-commons/api/auth";
 import path from "path";
@@ -8,7 +8,7 @@ const privateKey = fs.readFileSync(
   path.join(authCommons.findKeyPath(__dirname), "private.key"),
   "utf8"
 );
-const publicKey = fs.readFileSync("./keys/public.key", "utf8");
+
 const jwtExpires = parseInt(`${process.env.JWT_EXPIRES}`);
 const jwtAlgorithm = "RS256";
 
