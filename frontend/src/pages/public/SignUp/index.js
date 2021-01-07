@@ -19,7 +19,7 @@ class SignUp extends React.Component {
 
   handleSignUp = async (event) => {
     event.preventDefault();
-    const { name, email, password, domain, isLoading } = this.state;
+    const { name, email, password, domain} = this.state;
 
     if (!name || !email || !domain || !password) {
       this.setState({ error: "Informe todos os campos para se cadastrar!" });
