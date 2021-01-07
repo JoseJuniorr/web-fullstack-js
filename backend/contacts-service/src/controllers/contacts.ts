@@ -20,15 +20,15 @@ async function getContact(req: Request, res: Response, next: any) {
   try {
     const id = parseInt(req.params.id);
 
-    if (!id) return res.status(400).end;
+    if (!id) return res.status(400).json({ message: "id is required" });
 
     const token = controllerCommons.getToken(res) as Token;
     const contact = await repository.findById(id, token.accountId);
-    if (contact === null) return res.status(404).end();
-    else res.json(contact);
+    if (contact === null) return res.sendStatus(404);
+    else res.status(200).json(contact);
   } catch (error) {
     console.log(`getContact: ${error}`);
-    res.status(400).end();
+    res.sendStatus(400);
   }
 }
 
@@ -40,7 +40,7 @@ async function addContact(req: Request, res: Response, next: any) {
     res.status(201).json(result);
   } catch (error) {
     console.log(`addContact: ${error}`);
-    res.status(400).end();
+    res.sendStatus(400);
   }
 }
 

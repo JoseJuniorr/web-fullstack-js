@@ -23,13 +23,13 @@ async function getAccountById(req: Request, res: Response, next: any) {
     const id = parseInt(req.params.id);
     if (!id) throw new Error("ID invalid format");
 
-    // const token = controllerCommons.getToken(res) as Token;
-    // if (id !== token.accountId) return res.status(403).end();
+    const token = controllerCommons.getToken(res) as Token;
+    if (id !== token.accountId) return res.sendStatus(403);
 
     const account = await repository.findById(id);
 
     if (account === null) {
-      return res.status(404).end();
+      return res.sendStatus(404);
     } else {
       account.password = "";
       res.json(account);
@@ -51,18 +51,19 @@ async function addAccount(req: Request, res: Response, next: any) {
     res.status(201).json(newAccount);
   } catch (error) {
     console.log(error);
-    res.status(400).end();
+    res.sendStatus(400);
   }
 }
 
 async function setAccount(req: Request, res: Response, next: any) {
   try {
-    const accountId = parseInt(req.params.id);
-    if (!accountId) throw new Error("ID is invalid format.");
     const accountParams = req.body as IAccount;
 
-    // const token = controllerCommons.getToken(res) as Token;
-    // if (accountId !== token.accountId) return res.status(403).end();
+    const accountId = parseInt(req.params.id);
+    if (!accountId) return res.status(400).json({ message: "id is required" });
+
+    const token = controllerCommons.getToken(res) as Token;
+    if (accountId !== token.accountId) return res.sendStatus(403);
 
     if (accountParams.password)
       accountParams.password = auth.hashPassword(accountParams.password);
@@ -72,7 +73,7 @@ async function setAccount(req: Request, res: Response, next: any) {
       updatedAccount.password = "";
 
       res.status(200).json(updatedAccount);
-    } else res.status(404).end();
+    } else res.sendStatus(404);
   } catch (error) {
     console.log(`setAccount: ${error}`);
     res.status(400).end();
@@ -95,11 +96,11 @@ async function loginAccount(req: Request, res: Response, next: any) {
         return res.json({ auth: true, token });
       }
 
-      res.status(401).end();
+      res.sendStatus(401);
     }
   } catch (error) {
     console.log(`loginAccount: ${error}`);
-    res.status(400).end();
+    res.sendStatus(404);
   }
 }
 
@@ -110,17 +111,16 @@ function logoutAccount(req: Request, res: Response, next: any) {
 async function deleteAccount(req: Request, res: Response, next: any) {
   try {
     const accountId = parseInt(req.params.id);
-    if (!accountId) return res.status(400).end();
+    if (!accountId) return res.status(400).json({ message: "id is required" });
 
-    // const token = controllerCommons.getToken(res) as Token;
-    // if (accountId !== token.accountId) return res.status(403).end();
+    const token = controllerCommons.getToken(res) as Token;
+    if (accountId !== token.accountId) return res.sendStatus(403);
 
     await repository.remove(accountId);
-    res.status(200).end();
-
+    res.sendStatus(204);
   } catch (error) {
     console.log(`deleteAccount: ${error}`);
-    res.status(400).end();
+    res.sendStatus(400);
   }
 }
 

@@ -3,9 +3,15 @@ import fs from "fs";
 import path from "path";
 
 const publicteKey = fs.readFileSync(
-  path.resolve(__dirname, "../../keys/public.key"),
+  path.join(findKeyPath(__dirname), "public.key"),
   "utf8"
 );
+
+function findKeyPath(currentPath: string): string {
+  const keysPath = path.join(currentPath, "keys");
+  if (fs.existsSync(keysPath)) return keysPath;
+  else return findKeyPath(path.join(currentPath, ".."));
+}
 
 const jwtAlgorithm = "RS256";
 
@@ -24,4 +30,4 @@ async function verify(token: string) {
   }
 }
 
-export default { verify };
+export default { verify, findKeyPath };

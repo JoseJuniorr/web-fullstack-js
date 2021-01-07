@@ -7,14 +7,19 @@ import {
   validateAuthentication,
   validateLoginSchema,
   validateUpdateAccountSchema,
-  validateAuthorization
+  validateAuthorization,
 } from "./middlewares";
 
 const router = Router();
 
 router.get("/accounts", validateAuthentication, accountsController.getAccounts);
 
-router.get("/accounts/:id", validateAuthentication, validateAuthorization, accountsController.getAccountById);
+router.get(
+  "/accounts/:id",
+  validateAuthentication,
+  validateAuthorization,
+  accountsController.getAccountById
+);
 
 router.patch(
   "/accounts/:id",
@@ -34,8 +39,17 @@ router.post(
   accountsController.loginAccount
 );
 
-router.post("/accounts/logout", validateAuthentication, accountsController.logoutAccount);
+router.post(
+  "/accounts/logout",
+  validateAuthentication,
+  accountsController.logoutAccount
+);
 
- router.delete("/accounts/:id", validateAuthentication, validateAuthorization, accountsController.deleteAccount);
+router.delete(
+  "/accounts/:id",
+  validateAuthentication,
+  validateAuthorization,
+  accountsController.deleteAccount
+);
 
 export default router;
