@@ -2,7 +2,7 @@ import jwt, { VerifyOptions } from "jsonwebtoken";
 import fs from "fs";
 import path from "path";
 
-const publicteKey = fs.readFileSync(
+const publicKey = fs.readFileSync(
   path.join(findKeyPath(__dirname), "public.key"),
   "utf8"
 );
@@ -19,7 +19,7 @@ export type Token = { accountId: number };
 
 async function verify(token: string) {
   try {
-    const decoded: Token = (await jwt.verify(token, publicteKey, {
+    const decoded: Token = (await jwt.verify(token, publicKey, {
       algorithms: [jwtAlgorithm],
     } as VerifyOptions)) as Token;
 
