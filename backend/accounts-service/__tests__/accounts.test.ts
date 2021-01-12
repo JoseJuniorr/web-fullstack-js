@@ -5,6 +5,7 @@ import app from "./../src/app";
 import repository from "../src/models/accountRepository";
 
 import auth from "../src/auth";
+import { AccountStatus } from "../src/models/accountsStatus";
 
 const testEmail = "jest@gmail.com";
 const testEmail2 = "jest2@gmail.com";
@@ -27,7 +28,7 @@ beforeAll(async () => {
 
   const result = await repository.addAccount(testAccount);
   testId = result.id!;
-  
+
   jwt = auth.sign(testId);
 });
 
@@ -51,7 +52,7 @@ describe("testando rotas do accounts-service", () => {
     const payload: IAccount = {
       name: "jest2",
       email: testEmail2,
-      password: "123654",
+      password: testPassword,
 
       domain: "jest.dev.br",
     };
@@ -85,7 +86,7 @@ describe("testando rotas do accounts-service", () => {
 
     expect(resultado.status).toEqual(200);
     expect(resultado.body.id).toEqual(testId);
-     expect(resultado.body.name).toEqual(payload.name);
+    expect(resultado.body.name).toEqual(payload.name);
   });
 
   it("PATCH /accounts/:id/ - Deve retornar statusCode 400", async () => {
@@ -142,6 +143,15 @@ describe("testando rotas do accounts-service", () => {
   it("DELETE /accounts/:id - Deve retornar statusCode 200", async () => {
     const resultado = await supertest(app)
       .delete("/accounts/" + testId)
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(200);
+    expect(resultado.body.status).toEqual(AccountStatus.REMOVED);
+  });
+
+  it("DELETE /accounts/:id?force=true - Deve retornar statusCode 200", async () => {
+    const resultado = await supertest(app)
+      .delete(`/accounts/${testId}?force=true`)
       .set("x-access-token", jwt);
 
     expect(resultado.status).toEqual(200);

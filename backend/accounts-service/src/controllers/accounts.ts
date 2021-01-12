@@ -6,6 +6,7 @@ import { Request, Response } from "express";
 import { IAccount } from "./../models/account";
 import repository from "../models/accountRepository";
 import auth from "../auth";
+import { AccountStatus } from "../models/accountsStatus";
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const accounts: IAccount[] = await repository.findAll();
@@ -116,8 +117,18 @@ async function deleteAccount(req: Request, res: Response, next: any) {
     const token = controllerCommons.getToken(res) as Token;
     if (accountId !== token.accountId) return res.sendStatus(403);
 
-    await repository.remove(accountId);
-    res.sendStatus(204);
+    if (req.query.force === "true") {
+      await repository.remove(accountId);
+      res.status(200).end();
+    } else {
+      const accountParams = {
+        status: AccountStatus.REMOVED,
+      } as IAccount;
+      const updatedAccount = await repository.set(accountId, accountParams);
+      res.json(updatedAccount);
+    }
+
+    res.status(200).end();
   } catch (error) {
     console.log(`deleteAccount: ${error}`);
     res.sendStatus(400);

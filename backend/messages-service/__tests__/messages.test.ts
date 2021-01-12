@@ -60,7 +60,7 @@ afterAll(async () => {
   console.log(`RemoveResult: ${removeResult}: RemoveResult2: ${removeResult2}`);
 
   const deleteResponse = await request(accountsApp)
-    .delete("/accounts/" + testAccountId)
+    .delete(`/accounts/${testAccountId}?force=true`)
     .set("x-access-token", jwt);
   console.log(`${deleteResponse.status}`);
 
