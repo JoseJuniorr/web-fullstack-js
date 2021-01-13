@@ -7,8 +7,8 @@ import repository from "../src/models/accountRepository";
 import auth from "../src/auth";
 import { AccountStatus } from "../src/models/accountsStatus";
 
-const testEmail = "jest@gmail.com";
-const testEmail2 = "jest2@gmail.com";
+const testEmail = "jest@accounts.test.com";
+const testEmail2 = "jest2@accounts.test.com";
 const hashPassword =
   "$2a$10$xPMrrzxd7w4doT5bQM7cMOVpZ3vTpo8Pag2qF8xO5m17tPVk1GQR6"; //123654
 const testPassword = "123654";
@@ -29,7 +29,7 @@ beforeAll(async () => {
   const result = await repository.addAccount(testAccount);
   testId = result.id!;
 
-  jwt = auth.sign(testId);
+  jwt = await auth.sign(testId);
 });
 
 afterAll(async () => {
@@ -38,14 +38,39 @@ afterAll(async () => {
 });
 
 describe("testando rotas do accounts-service", () => {
+  
   it("GET /accounts/ - Retorna statusCode 200", async () => {
     const resultado = await supertest(app)
       .get("/accounts/")
       .set("x-access-token", jwt);
 
     expect(resultado.status).toEqual(200);
-
     expect(Array.isArray(resultado.body)).toBeTruthy;
+  });
+
+  it("GET /accounts/:id - Deve retornar statusCode 200", async () => {
+    const resultado = await supertest(app)
+      .get("/accounts/" + testId)
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(200);
+    expect(resultado.body.id).toBe(testId);
+  });
+
+  it("GET /accounts/:id - Deve retornar statusCode 403", async () => {
+    const resultado = await supertest(app)
+      .get("/accounts/-1")
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(403);
+  });
+
+  it("GET /accounts/:id - Deve retornar statusCode 400", async () => {
+    const resultado = await supertest(app)
+      .get("/accounts/abc")
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(400);
   });
 
   it("POST /accounts/ - Deve retornar status 201", async () => {
@@ -53,7 +78,6 @@ describe("testando rotas do accounts-service", () => {
       name: "jest2",
       email: testEmail2,
       password: testPassword,
-
       domain: "jest.dev.br",
     };
 
@@ -102,9 +126,9 @@ describe("testando rotas do accounts-service", () => {
     expect(resultado.status).toEqual(400);
   });
 
-  it("PATCH /accounts:id/ - Deve retornar statusCode 403", async () => {
+  it("PATCH /accounts/:id/ - Deve retornar statusCode 403", async () => {
     const payload = {
-      name: "Jose Junior",
+      name: "name test",
     };
 
     const resultado = await supertest(app)
@@ -113,31 +137,6 @@ describe("testando rotas do accounts-service", () => {
       .set("x-access-token", jwt);
 
     expect(resultado.status).toEqual(403);
-  });
-
-  it("GET /accounts/:id - Deve retornar statusCode 200", async () => {
-    const resultado = await supertest(app)
-      .get("/accounts/" + testId)
-      .set("x-access-token", jwt);
-
-    expect(resultado.status).toEqual(200);
-    expect(resultado.body.id).toBe(testId);
-  });
-
-  it("GET /accounts/:id - Deve retornar statusCode 403", async () => {
-    const resultado = await supertest(app)
-      .get("/accounts/-1")
-      .set("x-access-token", jwt);
-
-    expect(resultado.status).toEqual(403);
-  });
-
-  it("GET /accounts/:id - Deve retornar statusCode 400", async () => {
-    const resultado = await supertest(app)
-      .get("/accounts/abc")
-      .set("x-access-token", jwt);
-
-    expect(resultado.status).toEqual(400);
   });
 
   it("DELETE /accounts/:id - Deve retornar statusCode 200", async () => {

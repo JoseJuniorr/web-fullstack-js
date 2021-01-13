@@ -58,23 +58,24 @@ async function addAccount(req: Request, res: Response, next: any) {
 
 async function setAccount(req: Request, res: Response, next: any) {
   try {
-    const accountParams = req.body as IAccount;
-
     const accountId = parseInt(req.params.id);
     if (!accountId) return res.status(400).json({ message: "id is required" });
 
     const token = controllerCommons.getToken(res) as Token;
     if (accountId !== token.accountId) return res.sendStatus(403);
 
+    const accountParams = req.body as IAccount;
+
     if (accountParams.password)
       accountParams.password = auth.hashPassword(accountParams.password);
 
     const updatedAccount = await repository.set(accountId, accountParams);
-    if (updatedAccount != null) {
+
+    if (updatedAccount !== null) {
       updatedAccount.password = "";
 
       res.status(200).json(updatedAccount);
-    } else res.sendStatus(404);
+    } else res.status(404).end();
   } catch (error) {
     console.log(`setAccount: ${error}`);
     res.status(400).end();

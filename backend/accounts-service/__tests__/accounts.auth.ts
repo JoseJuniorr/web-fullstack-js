@@ -5,7 +5,7 @@ import auth from "../src/auth";
 
 import repository from "../src/models/accountRepository";
 
-const testEmail = "jest@gmail.com";
+const testEmail = "jest@accounts.auth.com";
 const hashPassword =
   "$2a$10$xPMrrzxd7w4doT5bQM7cMOVpZ3vTpo8Pag2qF8xO5m17tPVk1GQR6"; //123654
 const testPassword = "123654";
@@ -25,7 +25,7 @@ beforeAll(async () => {
   const result = await repository.addAccount(testAccount);
 
   testAccountId = result.id!;
-  jwt = auth.sign(testAccountId);
+  jwt = await auth.sign(testAccountId);
 });
 
 afterAll(async () => {
