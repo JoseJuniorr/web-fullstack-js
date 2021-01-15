@@ -34,4 +34,10 @@ router.patch(
   contactsController.setContact
 );
 
+router.delete(
+  "/contacts/:id",
+  middlewareCommons.validateAuth,
+  contactsController.deleteContact
+);
+
 export default router;

@@ -35,4 +35,10 @@ router.patch(
   messagesController.setMessage
 );
 
+router.delete(
+  "/messages/:id",
+  middlewareCommons.validateAuth,
+  messagesController.deleteMessage
+);
+
 export default router;

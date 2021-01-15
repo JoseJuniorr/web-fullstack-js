@@ -3,9 +3,10 @@ import app from "./../src/app";
 import accountsApp from "../../accounts-service/src/app";
 import { IContact } from "../src/models/contact";
 import repository from "../src/models/contactRepository";
+import { ContactStatus } from "../src/models/contactStatus";
 
-const testEmail = "jest@gmail.com";
-const testEmail2 = "jest2@gmail.com";
+const testEmail = "contact@contacts.com";
+const testEmail2 = "contact2@gmail.com";
 const testPassword = "123456";
 
 let jwt: string = "";
@@ -14,7 +15,7 @@ let testContactId: number = 0;
 
 beforeAll(async () => {
   const testAccount = {
-    name: "jest",
+    name: "jest test account",
     email: testEmail,
     password: testPassword,
     domain: "jest.com",
@@ -28,16 +29,17 @@ beforeAll(async () => {
 
   const result = await request(accountsApp).post("/accounts/login").send({
     email: testEmail,
-    password: testPassword,
+    password: '123456',
   });
 
   jwt = result.body.token;
 
   const testContact = {
-    name: "jest",
+    name: "jestcontact",
     email: testEmail,
     phone: "4499999999",
   } as IContact;
+
   const result2 = await repository.add(testContact, testAccountId);
   testContactId = result2.id!;
 });
@@ -54,13 +56,13 @@ afterAll(async () => {
   const deleteResponse = await request(accountsApp)
     .delete(`/accounts/${testAccountId}?force=true`)
     .set("x-access-token", jwt);
-  console.log(`${deleteResponse.status}`);
+  console.log(`deleteResponse: ${deleteResponse.status}`);
 
   const logoutResponse = await request(accountsApp)
     .post("/accounts/logout")
     .set("x-access-token", jwt);
 
-  console.log(`${logoutResponse.status}`);
+  console.log(`logoutResponse: ${logoutResponse.status}`);
 });
 
 describe("testando rotas do contacts", () => {
@@ -229,5 +231,30 @@ describe("testando rotas do contacts", () => {
       .send(payload);
 
     expect(resultado.status).toEqual(400);
+  });
+
+  it("DELETE /contacts/:id - Deve retornar statusCode 200", async () => {
+    const resultado = await request(app)
+      .delete("/contacts/" + testContactId)
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(200);
+    expect(resultado.body.status).toEqual(ContactStatus.REMOVED);
+  });
+
+  it("DELETE /contacts/:id?force=true - Deve retornar statusCode 200", async () => {
+    const resultado = await request(app)
+      .delete(`/contacts/${testContactId}?force=true`)
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(200);
+  });
+
+  it("DELETE /contacts/:id - Deve retornar statusCode 403", async () => {
+    const resultado = await request(app)
+      .delete("/contacts/-1")
+      .set("x-access-token", jwt);
+
+    expect(resultado.status).toEqual(403);
   });
 });

@@ -1,8 +1,17 @@
 import messageModel, { IMessageModel } from "./messageModel";
 import { IMessage } from "./message";
+import { MessageStatus } from "./messageStatus";
 
-function findAll(accountId: number) {
-  return messageModel.findAll<IMessageModel>({ where: { accountId } });
+function findAll(accountId: number, includeRemoved: boolean) {
+  if (includeRemoved)
+    return messageModel.findAll<IMessageModel>({ where: { accountId } });
+  else
+    return messageModel.findAll<IMessageModel>({
+      where: {
+        accountId,
+        status: [MessageStatus.CREATED, MessageStatus.SENT],
+      },
+    });
 }
 
 function findById(messageId: number, accountId: number) {
@@ -23,7 +32,7 @@ async function set(messageId: number, message: IMessage, accountId: number) {
     where: { id: messageId, accountId: accountId },
   });
   if (originalMessage === null) return null;
-  if (message.subject) originalMessage.subject= message.subject;
+  if (message.subject) originalMessage.subject = message.subject;
   if (message.body) originalMessage.body = message.body;
   if (message.status) originalMessage.status = message.status;
   if (message.sendDate) originalMessage.sendDate = message.sendDate;

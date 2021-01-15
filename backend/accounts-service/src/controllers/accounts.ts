@@ -1,15 +1,15 @@
 import { Token } from "ms-commons/api/auth";
 import controllerCommons from "ms-commons/api/controllers/controller";
-
 import { Request, Response } from "express";
-
 import { IAccount } from "./../models/account";
 import repository from "../models/accountRepository";
 import auth from "../auth";
 import { AccountStatus } from "../models/accountsStatus";
 
 async function getAccounts(req: Request, res: Response, next: any) {
-  const accounts: IAccount[] = await repository.findAll();
+  const includeRemoved = req.query.includeRemoved == "true";
+
+  const accounts: IAccount[] = await repository.findAll(includeRemoved);
 
   res.json(
     accounts.map((item) => {
@@ -125,11 +125,10 @@ async function deleteAccount(req: Request, res: Response, next: any) {
       const accountParams = {
         status: AccountStatus.REMOVED,
       } as IAccount;
+
       const updatedAccount = await repository.set(accountId, accountParams);
       res.json(updatedAccount);
     }
-
-    res.status(200).end();
   } catch (error) {
     console.log(`deleteAccount: ${error}`);
     res.sendStatus(400);

@@ -2,8 +2,20 @@ import { IAccount } from "./account";
 import accountModel, { IAccountModel } from "./accountModel";
 import { DestroyOptions } from "sequelize";
 
-function findAll() {
-  return accountModel.findAll<IAccountModel>();
+import { AccountStatus } from "../models/accountsStatus";
+
+function findAll(includeRemoved: boolean) {
+  if (includeRemoved) return accountModel.findAll<IAccountModel>();
+  else
+    return accountModel.findAll<IAccountModel>({
+      where: {
+        status: [
+          AccountStatus.ACTIVE,
+          AccountStatus.CREATED,
+          AccountStatus.SUSPEND,
+        ],
+      },
+    });
 }
 
 function findByEmail(emailFilter: string) {
