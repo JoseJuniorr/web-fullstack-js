@@ -4,6 +4,9 @@ import controllerCommons from "ms-commons/api/controllers/controller";
 import { IMessage } from "../models/message";
 import { Token } from "ms-commons/api/auth";
 import { MessageStatus } from "../models/messageStatus";
+import { getContacts } from "ms-commons/api/clients/contactsService";
+import queueService from "../../queueService";
+import { IQueueMessage } from "../models/queueMessage";
 
 async function getMessage(req: Request, res: Response, next: any) {
   try {
@@ -91,10 +94,56 @@ async function deleteMessage(req: Request, res: Response, next: any) {
   }
 }
 
+async function sendMessage(req: Request, res: Response, next: any) {
+  try {
+    const token = controllerCommons.getToken(res) as Token;
+
+    //opbtendo a mensagem
+    let messageId = parseInt(req.params.id);
+    const message = repository.findById(messageId, token.accountId);
+
+    if (!message) return res.status(403).end();
+
+    //obtendo os contatos
+    const contacts = await getContacts(token.jwt!);
+    if (!contacts || contacts.length === 0) return res.status(400).end();
+
+    //enviar a mensagem para a fila
+    const promisses = contacts.map((item) => {
+      return queueService.sendMessage({
+        accountId: token.accountId,
+        contactId: item.id,
+        messageId: messageId,
+      } as IQueueMessage);
+    });
+
+    await Promise.all(promisses);
+
+    //atualizando a mensagem
+    const messageParams = {
+      status: MessageStatus.SENT,
+      sendDate: new Date(),
+    } as IMessage;
+
+    const updatedMessage = repository.set(
+      messageId,
+      messageParams,
+      token.accountId
+    );
+
+    if (updatedMessage) return res.json(updatedMessage);
+    else return res.status(403).end();
+  } catch (error) {
+    console.log(`sendMessage: ${error}`);
+    res.sendStatus(400);
+  }
+}
+
 export default {
   getMessage,
   getMessages,
   addMessage,
   setMessage,
   deleteMessage,
+  sendMessage,
 };

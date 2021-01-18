@@ -15,7 +15,7 @@ function findKeyPath(currentPath: string): string {
 
 const jwtAlgorithm = "RS256";
 
-export type Token = { accountId: number };
+export type Token = { accountId: number; jwt?: string };
 
 async function verify(token: string) {
   try {
@@ -23,7 +23,7 @@ async function verify(token: string) {
       algorithms: [jwtAlgorithm],
     } as VerifyOptions)) as Token;
 
-    return { accountId: decoded.accountId };
+    return { accountId: decoded.accountId, jwt: token };
   } catch (error) {
     console.log(`verify: ${error}`);
     return null;

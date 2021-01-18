@@ -1,4 +1,5 @@
 import { Router } from "express";
+import controller from "ms-commons/api/controllers/controller";
 const router = Router();
 
 import middlewareCommons from "ms-commons/api/routes/middlewares";
@@ -39,6 +40,12 @@ router.delete(
   "/messages/:id",
   middlewareCommons.validateAuth,
   messagesController.deleteMessage
+);
+
+router.post(
+  "/messages/:id/send",
+  middlewareCommons.validateAuth,
+  messagesController.sendMessage
 );
 
 export default router;
