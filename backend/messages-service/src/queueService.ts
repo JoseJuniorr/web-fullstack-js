@@ -1,10 +1,10 @@
 import AWS from "aws-sdk";
-import { IQueueMessage } from "./src/models/queueMessage";
+import { IQueueMessage } from "./models/queueMessage";
 
 function sendMessage(message: IQueueMessage) {
   AWS.config.update({ region: process.env.AWS_QUEUE_REGION });
   const sqs = new AWS.SQS();
-  sqs
+  return sqs
     .sendMessage({
       MessageBody: JSON.stringify(message),
       QueueUrl: `${process.env.AWS_QUEUE_URL}`,

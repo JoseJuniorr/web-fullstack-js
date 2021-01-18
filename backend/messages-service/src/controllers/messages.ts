@@ -5,7 +5,7 @@ import { IMessage } from "../models/message";
 import { Token } from "ms-commons/api/auth";
 import { MessageStatus } from "../models/messageStatus";
 import { getContacts } from "ms-commons/api/clients/contactsService";
-import queueService from "../../queueService";
+import queueService from "../queueService";
 import { IQueueMessage } from "../models/queueMessage";
 
 async function getMessage(req: Request, res: Response, next: any) {
@@ -100,6 +100,8 @@ async function sendMessage(req: Request, res: Response, next: any) {
 
     //opbtendo a mensagem
     let messageId = parseInt(req.params.id);
+    if (!messageId) return res.status(400).end();
+
     const message = repository.findById(messageId, token.accountId);
 
     if (!message) return res.status(403).end();
