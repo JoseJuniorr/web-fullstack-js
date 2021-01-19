@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  
-} from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
 import SignInPage from "../pages/public/SignIn";
 import SignUpPage from "../pages/public/SignUp";
@@ -15,6 +10,8 @@ import ContactsListPage from "../pages/secure/ContactsList";
 import ContactsAddPage from "../pages/secure/ContactAdd";
 import ContactDetail from "../pages/secure/ContactDetail";
 import RoutePrivate from "./route-wrapper";
+
+import MessageListPage from "../pages/secure/MessageList";
 
 export default function Routes() {
   return (
@@ -28,6 +25,13 @@ export default function Routes() {
           path="/contacts/:contactId"
           component={ContactDetail}
         />
+        <RoutePrivate exact path="/messages" component={MessageListPage} />
+        {/* <RoutePrivate exact path="/contacts/add" component={MessageAddPage} />
+        <RoutePrivate
+          exact
+          path="/messages/:messageId"
+          component={MessageDetailPage}
+        /> */}
         <Route exact path="/signin" component={SignInPage} />
         <Route exact path="/signup" component={SignUpPage} />
       </Switch>
