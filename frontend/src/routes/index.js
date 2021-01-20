@@ -12,6 +12,8 @@ import ContactDetail from "../pages/secure/ContactDetail";
 import RoutePrivate from "./route-wrapper";
 
 import MessageListPage from "../pages/secure/MessageList";
+import MessageAddPage from "../pages/secure/MessagesAdd";
+import MessageDetailPage from "../pages/secure/MessageDetail";
 
 export default function Routes() {
   return (
@@ -26,12 +28,12 @@ export default function Routes() {
           component={ContactDetail}
         />
         <RoutePrivate exact path="/messages" component={MessageListPage} />
-        {/* <RoutePrivate exact path="/contacts/add" component={MessageAddPage} />
+        <RoutePrivate exact path="/messages/add" component={MessageAddPage} />
         <RoutePrivate
           exact
           path="/messages/:messageId"
           component={MessageDetailPage}
-        /> */}
+        />
         <Route exact path="/signin" component={SignInPage} />
         <Route exact path="/signup" component={SignUpPage} />
       </Switch>

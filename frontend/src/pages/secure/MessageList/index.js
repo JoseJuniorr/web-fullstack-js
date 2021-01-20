@@ -5,6 +5,32 @@ import { Container, Table, Row, Col, Badge } from "react-bootstrap";
 import { Link, withRouter, useRouteMatch } from "react-router-dom";
 import MessageService from "../../../services/messages";
 
+function RenderMessageStatus({ status }) {
+  let statusName = {};
+
+  switch (status) {
+    case 100:
+      statusName = { title: "CRIADA", css: "primary" };
+      break;
+    case 200:
+      statusName = { title: "ENVIADA", css: "success" };
+      break;
+    case 300:
+      statusName = { title: "REMOVIDA", css: "danger" };
+      break;
+
+    default:
+      statusName = { title: "INDEFINIDA", css: "light" };
+      break;
+  }
+
+  return (
+    <Badge pill variant={statusName.css}>
+      {statusName.title}{" "}
+    </Badge>
+  );
+}
+
 function RenderEmptyRow({ mensagem }) {
   return (
     <tr>
@@ -20,7 +46,9 @@ function RenderLine({ message }) {
       <td>
         <Link to={`${url}/${message.id}`}>{message.subject}</Link>
       </td>
-      <td>{message.status}</td>
+      <td>
+        <RenderMessageStatus status={message.status} />
+      </td>
     </tr>
   );
 }
@@ -74,7 +102,7 @@ class MessageList extends React.Component {
   }
 
   render() {
-    const { messages } = this.state;
+    const { messages, isLoading } = this.state;
     return (
       <>
         <Header />
@@ -89,7 +117,11 @@ class MessageList extends React.Component {
               </Col>
             </Row>
             <p>Lista de mensagens enviadas</p>
-            <RenderTable messages={messages} />
+            {isLoading ? (
+              <p>Carregando ...</p>
+            ) : (
+              <RenderTable messages={messages} />
+            )}
           </Container>
         </PageContent>
       </>
