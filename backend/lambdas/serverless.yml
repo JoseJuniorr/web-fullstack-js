@@ -1,0 +1,28 @@
+service: mailshrimp
+
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "sqs:*"
+      Resource: "*"
+  tags:
+    STAGE: prd
+    PROJECT: mailshrimp
+
+  lambdaHashingVersion: 20201221
+
+functions:
+  send-message:
+    description: "Envia o e-mail"
+    handler: src/handlers/send-message/handler.sendMessage
+    memorySize: 128
+    timeout: 10
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-1:400016104213:Mailshrimp.fifo
+          batchSize: 1

@@ -134,6 +134,7 @@ async function sendMessage(req: Request, res: Response, next: any) {
     );
 
     if (updatedMessage) return res.json(updatedMessage);
+    
     else return res.status(403).end();
   } catch (error) {
     console.log(`sendMessage: ${error}`);
