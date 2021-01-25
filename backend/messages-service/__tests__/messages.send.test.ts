@@ -61,6 +61,7 @@ beforeAll(async () => {
   const addResult = await repository.add(testMessage, testAccountId);
   console.log(`addResult: ${addResult}`);
   testMessageId = addResult.id!;
+  console.log(testMessageId);
 });
 
 afterAll(async () => {
@@ -96,8 +97,8 @@ describe("testando rotas do messages", () => {
       .set("x-access-token", jwt);
 
     expect(resultado.status).toEqual(200);
-    // expect(resultado.body.id).toEqual(testMessageId);
-    // expect(resultado.body.status).toEqual(MessageStatus.SENT);
+    expect(resultado.body.id).toEqual(testMessageId);
+    expect(resultado.body.status).toEqual(MessageStatus.SENT);
   });
 
   it("POST /messages/:id/send - Retorna statusCode 401", async () => {

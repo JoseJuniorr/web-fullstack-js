@@ -11,8 +11,8 @@ async function sendMessage(event) {
       const payload = payloasParsed[0];
 
       console.log(`messageId: ${payload.messageId}`);
-      console.log(`messageId: ${payload.accountId}`);
-      console.log(`messageId: ${payload.contactId}`);
+      console.log(`accountId: ${payload.accountId}`);
+      console.log(`contactId: ${payload.contactId}`);
 
       return {
         statusCode: 200,

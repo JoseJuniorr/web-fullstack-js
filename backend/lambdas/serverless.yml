@@ -14,7 +14,7 @@ provider:
     STAGE: prd
     PROJECT: mailshrimp
 
-  lambdaHashingVersion: 20201221
+  
 
 functions:
   send-message:
@@ -24,5 +24,5 @@ functions:
     timeout: 10
     events:
       - sqs:
-          arn: arn:aws:sqs:us-east-1:400016104213:Mailshrimp.fifo
+          arn: arn:aws:sqs:us-east-1:400016104213:mailshrimp
           batchSize: 1

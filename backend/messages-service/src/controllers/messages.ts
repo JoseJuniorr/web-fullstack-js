@@ -97,12 +97,13 @@ async function deleteMessage(req: Request, res: Response, next: any) {
 async function sendMessage(req: Request, res: Response, next: any) {
   try {
     const token = controllerCommons.getToken(res) as Token;
+    // console.log(token);
 
     //opbtendo a mensagem
     let messageId = parseInt(req.params.id);
-    if (!messageId) return res.status(400).end();
+    if (!messageId) return res.status(400).json({ message: "id is required" });
 
-    const message = repository.findById(messageId, token.accountId);
+    const message = await repository.findById(messageId, token.accountId);
 
     if (!message) return res.status(403).end();
 
@@ -111,11 +112,11 @@ async function sendMessage(req: Request, res: Response, next: any) {
     if (!contacts || contacts.length === 0) return res.status(400).end();
 
     //enviar a mensagem para a fila
-    const promisses = contacts.map((item) => {
+    const promisses = contacts.map((contact) => {
       return queueService.sendMessage({
-        accountId: token.accountId,
-        contactId: item.id,
         messageId: messageId,
+        contactId: contact.id,
+        accountId: token.accountId,
       } as IQueueMessage);
     });
 
@@ -127,15 +128,14 @@ async function sendMessage(req: Request, res: Response, next: any) {
       sendDate: new Date(),
     } as IMessage;
 
-    const updatedMessage = repository.set(
+    const updatedMessage = await repository.set(
       messageId,
       messageParams,
       token.accountId
     );
 
-    if (updatedMessage) return res.json(updatedMessage);
-    
-    else return res.status(403).end();
+    if (updatedMessage) return res.status(200).json(updatedMessage);
+    else return res.sendStatus(403);
   } catch (error) {
     console.log(`sendMessage: ${error}`);
     res.sendStatus(400);
