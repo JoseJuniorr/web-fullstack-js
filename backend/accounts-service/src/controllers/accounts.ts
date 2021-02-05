@@ -5,6 +5,7 @@ import { IAccount } from "./../models/account";
 import repository from "../models/accountRepository";
 import auth from "../auth";
 import { AccountStatus } from "../models/accountsStatus";
+import emailService from "ms-commons/api/clients/emailService";
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const includeRemoved = req.query.includeRemoved == "true";
@@ -48,6 +49,11 @@ async function addAccount(req: Request, res: Response, next: any) {
     const result = await repository.addAccount(newAccount);
     newAccount.password = "";
     newAccount.id = result.id;
+
+    // newAccount.settings = await emailService.addEmailIdentity(
+    //   newAccount.domain
+    // );
+    await emailService.addEmailIdentity(newAccount.domain);
 
     res.status(201).json(newAccount);
   } catch (error) {
