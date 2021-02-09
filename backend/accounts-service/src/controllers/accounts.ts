@@ -50,10 +50,9 @@ async function addAccount(req: Request, res: Response, next: any) {
     newAccount.password = "";
     newAccount.id = result.id;
 
-    // newAccount.settings = await emailService.addEmailIdentity(
-    //   newAccount.domain
-    // );
-    await emailService.addEmailIdentity(newAccount.domain);
+    newAccount.settings = await emailService.createAccountSettings(
+      newAccount.domain
+    );
 
     res.status(201).json(newAccount);
   } catch (error) {
