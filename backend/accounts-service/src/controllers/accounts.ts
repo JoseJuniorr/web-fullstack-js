@@ -94,10 +94,10 @@ async function loginAccount(req: Request, res: Response, next: any) {
     const account = await repository.findByEmail(loginParams.email);
 
     if (account !== null) {
-      const isValid = auth.comparePassword(
-        loginParams.password,
-        account.password
-      );
+      const isValid =
+        auth.comparePassword(loginParams.password, account.password) &&
+        account.status !== AccountStatus.REMOVED;
+
       if (isValid) {
         const token = await auth.sign(account.id!);
         return res.json({ auth: true, token });
@@ -123,6 +123,12 @@ async function deleteAccount(req: Request, res: Response, next: any) {
     const token = controllerCommons.getToken(res) as Token;
     if (accountId !== token.accountId) return res.sendStatus(403);
 
+    const account = await repository.findById(accountId);
+
+    if (account == null) return res.status(404).end();
+
+    await emailService.removeEmailIdentity(account.domain);
+
     if (req.query.force === "true") {
       await repository.remove(accountId);
       res.status(200).end();
@@ -132,7 +138,12 @@ async function deleteAccount(req: Request, res: Response, next: any) {
       } as IAccount;
 
       const updatedAccount = await repository.set(accountId, accountParams);
-      res.json(updatedAccount);
+      if (updatedAccount != null) {
+        updatedAccount.password = "";
+        res.json(updatedAccount);
+      } else {
+        res.end();
+      }
     }
   } catch (error) {
     console.log(`deleteAccount: ${error}`);

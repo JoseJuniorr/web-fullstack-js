@@ -124,4 +124,21 @@ async function createAccountSettings(domain: string) {
   return getAccountSettings(domain);
 }
 
-export default { addEmailIdentity, createAccountSettings, getAccountSettings };
+async function removeEmailIdentity(domainOrEmail: string) {
+  const ses = new AWS.SESV2();
+  const params = { EmailIdentity: domainOrEmail };
+
+  try {
+    return await ses.deleteEmailIdentity(params).promise();
+  } catch (error) {
+    if (error.statusCode === 404) return true;
+    throw error;
+  }
+}
+
+export default {
+  addEmailIdentity,
+  createAccountSettings,
+  getAccountSettings,
+  removeEmailIdentity,
+};
