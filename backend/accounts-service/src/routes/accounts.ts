@@ -12,6 +12,12 @@ import {
 
 const router = Router();
 
+router.get(
+  "/accounts/settings",
+  validateAuthentication,
+  accountsController.getAccountSettings
+);
+
 router.get("/accounts", validateAuthentication, accountsController.getAccounts);
 
 router.get(
@@ -29,9 +35,13 @@ router.patch(
   accountsController.setAccount
 );
 
-router.post("/accounts/", validateAccountSchema, accountsController.addAccount);
+router.post(
+  "/accounts/settings",
+  validateAuthentication,
+  accountsController.createAccountSettings
+);
 
-//Auth routes
+router.post("/accounts/", validateAccountSchema, accountsController.addAccount);
 
 router.post(
   "/accounts/login",

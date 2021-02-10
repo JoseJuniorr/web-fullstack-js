@@ -5,7 +5,10 @@ import { IAccount } from "./../models/account";
 import repository from "../models/accountRepository";
 import auth from "../auth";
 import { AccountStatus } from "../models/accountsStatus";
-import emailService from "ms-commons/api/clients/emailService";
+import emailService, {
+  AccountSettings,
+} from "ms-commons/api/clients/emailService";
+import accountRepository from "../models/accountRepository";
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const includeRemoved = req.query.includeRemoved == "true";
@@ -151,6 +154,41 @@ async function deleteAccount(req: Request, res: Response, next: any) {
   }
 }
 
+async function getAccountSettings(req: Request, res: Response, next: any) {
+  try {
+    const token = controllerCommons.getToken(res) as Token;
+    const account = await accountRepository.findById(token.accountId);
+    if (!account) return res.status(404).end();
+
+    const settings = await emailService.getAccountSettings(account.domain);
+    res.json(settings);
+  } catch (error) {
+    console.log(`getAccountSettings: ${error}`);
+    res.status(400).end();
+  }
+}
+
+async function createAccountSettings(req: Request, res: Response, next: any) {
+  try {
+    const token = controllerCommons.getToken(res) as Token;
+    const account = await accountRepository.findById(token.accountId);
+    if (!account) return res.status(404).end();
+
+    let accountSettings: AccountSettings;
+    if (req.query.force === "true") {
+      await emailService.removeEmailIdentity(account.domain);
+    } else {
+      accountSettings = await emailService.getAccountSettings(account.domain);
+      if (accountSettings) return res.json(accountSettings);
+    }
+    accountSettings = await emailService.createAccountSettings(account.domain);
+    res.status(201).json(accountSettings);
+  } catch (error) {
+    console.log(`createAccountSettings: ${error}`);
+    res.status(400).end();
+  }
+}
+
 export default {
   getAccounts,
   addAccount,
@@ -159,4 +197,6 @@ export default {
   loginAccount,
   logoutAccount,
   deleteAccount,
+  getAccountSettings,
+  createAccountSettings,
 };
