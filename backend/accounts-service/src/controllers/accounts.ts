@@ -11,7 +11,6 @@ import emailService, {
 import accountRepository from "../models/accountRepository";
 import { IAccountEmail } from "../models/accountEmail";
 import accountEmailRepository from "src/models/accountEmailRepository";
-import { string } from "joi";
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const includeRemoved = req.query.includeRemoved == "true";
@@ -246,6 +245,101 @@ async function addAccountEmail(req: Request, res: Response, next: any) {
   }
 }
 
+async function getAccountEmails(req: Request, res: Response, next: any) {
+  try {
+    const token = controllerCommons.getToken(res) as Token;
+    const account = await accountRepository.findById(token.accountId);
+    if (!account) return res.status(404).end();
+
+    let emails: string[] = [];
+    const accountEmails = account.get("accountEmails", {
+      plain: true,
+    }) as IAccountEmail[];
+    if (accountEmails && accountEmails.length > 0) {
+      emails = accountEmails.map((item) => item.email);
+    }
+
+    const settings = await emailService.getEmailSettings(emails);
+    res.json(settings);
+  } catch (error) {
+    console.log(`getAccountEmails: ${error}`);
+    res.status(400).end();
+  }
+}
+
+async function getAccountEmail(req: Request, res: Response, next: any) {
+  try {
+    const id = parseInt(req.params.id);
+    if (!id) return res.status(400).end();
+
+    const token = controllerCommons.getToken(res) as Token;
+
+    const accountEmail = (await accountEmailRepository.findById(
+      id,
+      token.accountId,
+      true
+    )) as IAccountEmail;
+
+    if (!accountEmail) return res.status(404).end();
+    const settings = await emailService.getEmailSettings([accountEmail.email]);
+    if (!settings || settings.length === 0) return res.status(404).end();
+    accountEmail.settings = settings[0];
+    res.json(accountEmail);
+  } catch (error) {
+    console.log(`getAccountEmail: ${error}`);
+    res.status(400).end();
+  }
+}
+
+async function setAccountEmail(req: Request, res: Response, next: any) {
+  try {
+    const accountEmailId = parseInt(req.params.id);
+    if (!accountEmailId)
+      return res.status(400).json({ message: "id is required" });
+
+    const token = controllerCommons.getToken(res) as Token;
+
+    const accountEmailParams = req.body as IAccountEmail;
+    const updatedAccountEmail = await accountEmailRepository.set(
+      accountEmailId,
+      token.accountId,
+      accountEmailParams
+    );
+
+    if (updatedAccountEmail !== null) {
+      res.json(updatedAccountEmail);
+    } else res.status(404).end();
+  } catch (error) {
+    console.log(`setAccountEmail: ${error}`);
+    res.status(400).end();
+  }
+}
+
+async function deleteAccountEmail(req: Request, res: Response, next: any) {
+  try {
+    const accountEmailId = parseInt(req.params.id);
+    if (!accountEmailId)
+      return res.status(400).json({ message: "id is required" });
+
+    const token = controllerCommons.getToken(res) as Token;
+
+    const accountEmail = await accountEmailRepository.findById(
+      accountEmailId,
+      token.accountId
+    );
+
+    if (accountEmail == null) return res.status(404).end();
+
+    await emailService.removeEmailIdentity(accountEmail.email);
+
+    await accountEmailRepository.remove(accountEmailId, token.accountId);
+    res.status(200).end();
+  } catch (error) {
+    console.log(`deleteAccountEmail: ${error}`);
+    res.sendStatus(400);
+  }
+}
+
 export default {
   getAccounts,
   addAccount,
@@ -257,4 +351,8 @@ export default {
   getAccountSettings,
   createAccountSettings,
   addAccountEmail,
+  getAccountEmails,
+  getAccountEmail,
+  setAccountEmail,
+  deleteAccountEmail,
 };

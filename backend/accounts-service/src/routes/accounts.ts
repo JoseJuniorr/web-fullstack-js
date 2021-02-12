@@ -9,6 +9,7 @@ import {
   validateUpdateAccountSchema,
   validateAuthorization,
   validateAccountEmailSchema,
+  validateAccountEmailUpdateSchema,
 } from "./middlewares";
 
 const router = Router();
@@ -17,6 +18,18 @@ router.get(
   "/accounts/settings",
   validateAuthentication,
   accountsController.getAccountSettings
+);
+
+router.get(
+  "/accounts/settings/accountEmails",
+  validateAuthentication,
+  accountsController.getAccountEmails
+);
+
+router.get(
+  "/accounts/settings/accountEmails/:id",
+  validateAuthentication,
+  accountsController.getAccountEmail
 );
 
 router.get("/accounts", validateAuthentication, accountsController.getAccounts);
@@ -34,6 +47,13 @@ router.patch(
   validateAuthorization,
   validateUpdateAccountSchema,
   accountsController.setAccount
+);
+
+router.patch(
+  "/accounts/settings/accountEmails/:id",
+  validateAuthentication,
+  validateAccountEmailUpdateSchema,
+  accountsController.setAccountEmail
 );
 
 router.put(
@@ -68,6 +88,12 @@ router.delete(
   validateAuthentication,
   validateAuthorization,
   accountsController.deleteAccount
+);
+
+router.delete(
+  "/accounts/settings/accountEmails/:id",
+  validateAuthentication,
+  accountsController.deleteAccountEmail
 );
 
 export default router;

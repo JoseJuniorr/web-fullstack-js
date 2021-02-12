@@ -7,9 +7,10 @@ function findByEmail(email: string, accountId: number) {
   });
 }
 
-function findById(id: number, accountId: number) {
+function findById(id: number, accountId: number, rawResult?: boolean) {
   return accountEmailModel.findOne<IAccountEmailModel>({
     where: { id, accountId },
+    raw: rawResult ? true : false,
   });
 }
 
