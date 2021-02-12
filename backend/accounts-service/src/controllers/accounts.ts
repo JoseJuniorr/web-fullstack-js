@@ -9,6 +9,9 @@ import emailService, {
   AccountSettings,
 } from "ms-commons/api/clients/emailService";
 import accountRepository from "../models/accountRepository";
+import { IAccountEmail } from "../models/accountEmail";
+import accountEmailRepository from "src/models/accountEmailRepository";
+import { string } from "joi";
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const includeRemoved = req.query.includeRemoved == "true";
@@ -157,10 +160,22 @@ async function deleteAccount(req: Request, res: Response, next: any) {
 async function getAccountSettings(req: Request, res: Response, next: any) {
   try {
     const token = controllerCommons.getToken(res) as Token;
-    const account = await accountRepository.findById(token.accountId);
+    const account = await accountRepository.findByIdWithEmails(token.accountId);
     if (!account) return res.status(404).end();
 
-    const settings = await emailService.getAccountSettings(account.domain);
+    let emails: string[] = [];
+    const accountEmails = account.get("accountEmails", {
+      plain: true,
+    }) as IAccountEmail[];
+
+    if (accountEmails && accountEmails.length > 0) {
+      emails = accountEmails.map((item) => item.email);
+    }
+
+    const settings = await emailService.getAccountSettings(
+      account.domain,
+      emails
+    );
     res.json(settings);
   } catch (error) {
     console.log(`getAccountSettings: ${error}`);
@@ -178,13 +193,55 @@ async function createAccountSettings(req: Request, res: Response, next: any) {
     if (req.query.force === "true") {
       await emailService.removeEmailIdentity(account.domain);
     } else {
-      accountSettings = await emailService.getAccountSettings(account.domain);
+      accountSettings = await emailService.getAccountSettings(
+        account.domain,
+        []
+      );
       if (accountSettings) return res.json(accountSettings);
     }
     accountSettings = await emailService.createAccountSettings(account.domain);
     res.status(201).json(accountSettings);
   } catch (error) {
     console.log(`createAccountSettings: ${error}`);
+    res.status(400).end();
+  }
+}
+
+async function addAccountEmail(req: Request, res: Response, next: any) {
+  const accountEmail = req.body as IAccountEmail;
+  const token = controllerCommons.getToken(res) as Token;
+  try {
+    const account = await accountRepository.findByIdWithEmails(token.accountId);
+    if (!account) return res.status(404).end();
+
+    if (!accountEmail.email.endsWith(`@${account.domain}`))
+      return res.status(403).end();
+
+    const accountEmails = account.get("accountEmails", {
+      plain: true,
+    }) as IAccountEmail[];
+
+    let alreadyExists = false;
+
+    if (accountEmails && accountEmails.length > 0) {
+      alreadyExists = accountEmails.some(
+        (item) => item.email === accountEmail.email
+      );
+    }
+
+    if (alreadyExists) return res.status(400).end();
+
+    accountEmail.accountId = token.accountId;
+    const result = await accountEmailRepository.add(accountEmail);
+    if (!result.id) return res.status(400).end();
+
+    accountEmail.id = result.id!;
+    const response = await emailService.addEmailIdentity(accountEmail.email);
+    res.status(201).json(accountEmail);
+  } catch (error) {
+    console.log(`addAccountEmail: ${error}`);
+    if (accountEmail.id)
+      await accountEmailRepository.remove(accountEmail.id, token.accountId);
     res.status(400).end();
   }
 }
@@ -199,4 +256,5 @@ export default {
   deleteAccount,
   getAccountSettings,
   createAccountSettings,
+  addAccountEmail,
 };

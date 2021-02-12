@@ -2,6 +2,24 @@ import AWS from "aws-sdk";
 
 AWS.config.update({ region: process.env.AWS_SES_REGION });
 
+export type DnsRecord = {
+  type: string;
+  name: string;
+  value: string;
+  priority?: number;
+};
+
+export type DnsSettings = { dnsRecords: Array<DnsRecord>; verified: boolean };
+
+export type AccountSettings = {
+  Domain: DnsSettings;
+  DKIM: DnsSettings;
+  SPF: DnsSettings;
+  EmailAdresses: EmailSetting[];
+};
+
+export type EmailSetting = { email: string; verified: boolean };
+
 async function addEmailIdentity(domainOrEmail: string) {
   const ses = new AWS.SESV2();
   const params = { EmailIdentity: domainOrEmail };
@@ -19,21 +37,6 @@ function setMailFromDomain(domain: string) {
 
   return ses.putEmailIdentityMailFromAttributes(params).promise();
 }
-
-export type DnsRecord = {
-  type: string;
-  name: string;
-  value: string;
-  priority?: number;
-};
-
-export type DnsSettings = { dnsRecords: Array<DnsRecord>; verified: boolean };
-
-export type AccountSettings = {
-  Domain: DnsSettings;
-  DKIM: DnsSettings;
-  SPF: DnsSettings;
-};
 
 function getDkimSettings(
   domain: string,
@@ -99,7 +102,7 @@ async function getDomainSettings(domain: string) {
   return { verified, dnsRecords: [dnsRecord] } as DnsSettings;
 }
 
-async function getAccountSettings(domain: string) {
+async function getAccountSettings(domain: string, emails: string[]) {
   const ses = new AWS.SESV2();
   const params = {
     EmailIdentity: domain,
@@ -110,18 +113,23 @@ async function getAccountSettings(domain: string) {
   const spfSettings = getSPFSettings(domain, response);
   const domainSettings = await getDomainSettings(domain);
 
+  let emailAddresses = [] as Array<EmailSetting>;
+  if (emails && emails.length > 0) {
+    emailAddresses = await getEmailSettings(emails);
+  }
+
   return {
     DKIM: dkimSettings,
     SPF: spfSettings,
     Domain: domainSettings,
+    EmailAdresses: emailAddresses,
   } as AccountSettings;
 }
 
 async function createAccountSettings(domain: string) {
   const identityResponse = await addEmailIdentity(domain);
   const mailFromResponse = await setMailFromDomain(domain);
-
-  return getAccountSettings(domain);
+  return getAccountSettings(domain, []);
 }
 
 async function removeEmailIdentity(domainOrEmail: string) {
@@ -136,9 +144,35 @@ async function removeEmailIdentity(domainOrEmail: string) {
   }
 }
 
+async function getEmailSettings(emails: string[]) {
+  const ses = new AWS.SESV2();
+  const promises = emails.map((email) => {
+    return ses.getEmailIdentity({ EmailIdentity: email }).promise();
+  });
+
+  const results = await Promise.all(promises);
+  let emailSettings = [] as Array<EmailSetting>;
+
+  for (let x = 0; x < results.length; x++) {
+    emailSettings.push({
+      email: emails[x],
+      verified: results[x].VerifiedForSendingStatus!,
+    } as EmailSetting);
+  }
+
+  return emailSettings;
+}
+
+async function canSendEmail(email: string) {
+  const emailSetting = await getEmailSettings([email]);
+  return emailSetting && emailSetting.length > 0 && emailSetting[0].verified;
+}
+
 export default {
   addEmailIdentity,
   createAccountSettings,
   getAccountSettings,
   removeEmailIdentity,
+  getEmailSettings,
+  canSendEmail,
 };

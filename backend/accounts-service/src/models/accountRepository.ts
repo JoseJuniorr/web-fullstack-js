@@ -3,6 +3,7 @@ import accountModel, { IAccountModel } from "./accountModel";
 import { DestroyOptions } from "sequelize";
 
 import { AccountStatus } from "../models/accountsStatus";
+import AccountEmailModel from "./accountEmailModel";
 
 function findAll(includeRemoved: boolean) {
   if (includeRemoved) return accountModel.findAll<IAccountModel>();
@@ -24,6 +25,12 @@ function findByEmail(emailFilter: string) {
 
 function findById(id: number) {
   return accountModel.findByPk<IAccountModel>(id);
+}
+
+function findByIdWithEmails(id: number) {
+  return accountModel.findByPk<IAccountModel>(id, {
+    include: AccountEmailModel,
+  });
 }
 
 function addAccount(account: IAccount) {
@@ -65,4 +72,5 @@ export default {
   findByEmail,
   remove,
   removeByEmail,
+  findByIdWithEmails,
 };

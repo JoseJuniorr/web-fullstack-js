@@ -3,12 +3,32 @@ import { Request, Response } from "express";
 import { Token } from "ms-commons/api/auth";
 import commonsMiddleware from "ms-commons/api/routes/middlewares";
 import controllerCommons from "ms-commons/api/controllers/controller";
+import {
+  accountEmailSchema,
+  accountEmailUpdateSchema,
+} from "../models/accountEmailSchemas";
 
 import {
   accountSchema,
   loginSchema,
   accountUpdateSchema,
 } from "../models/accountSchemas";
+
+function validateAccountEmailSchema(req: Request, res: Response, next: any) {
+  return commonsMiddleware.validateSchema(accountEmailSchema, req, res, next);
+}
+function validateAccountEmailUpdateSchema(
+  req: Request,
+  res: Response,
+  next: any
+) {
+  return commonsMiddleware.validateSchema(
+    accountEmailUpdateSchema,
+    req,
+    res,
+    next
+  );
+}
 
 function validateAccountSchema(req: Request, res: Response, next: any) {
   return commonsMiddleware.validateSchema(accountSchema, req, res, next);
@@ -40,5 +60,7 @@ export {
   validateLoginSchema,
   validateUpdateAccountSchema,
   validateAuthentication,
-  validateAuthorization
+  validateAuthorization,
+  validateAccountEmailSchema,
+  validateAccountEmailUpdateSchema,
 };

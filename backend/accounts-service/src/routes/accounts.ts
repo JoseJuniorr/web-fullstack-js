@@ -8,6 +8,7 @@ import {
   validateLoginSchema,
   validateUpdateAccountSchema,
   validateAuthorization,
+  validateAccountEmailSchema,
 } from "./middlewares";
 
 const router = Router();
@@ -33,6 +34,13 @@ router.patch(
   validateAuthorization,
   validateUpdateAccountSchema,
   accountsController.setAccount
+);
+
+router.put(
+  "/accounts/settings/accountEmails",
+  validateAuthentication,
+  validateAccountEmailSchema,
+  accountsController.addAccountEmail
 );
 
 router.post(
