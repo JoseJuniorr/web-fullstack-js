@@ -39,6 +39,10 @@ function removeByEmail(email: string, accountId: number) {
   return accountEmailModel.destroy({ where: { email, accountId } });
 }
 
+function removeAll(accountId: number) {
+  return accountEmailModel.destroy({ where: { accountId } });
+}
+
 export default {
   findByEmail,
   findById,
@@ -46,4 +50,5 @@ export default {
   set,
   remove,
   removeByEmail,
+  removeAll,
 };

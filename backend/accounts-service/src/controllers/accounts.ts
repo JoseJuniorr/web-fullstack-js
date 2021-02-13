@@ -10,7 +10,7 @@ import emailService, {
 } from "ms-commons/api/clients/emailService";
 import accountRepository from "../models/accountRepository";
 import { IAccountEmail } from "../models/accountEmail";
-import accountEmailRepository from "src/models/accountEmailRepository";
+import accountEmailRepository from "../models/accountEmailRepository";
 
 async function getAccounts(req: Request, res: Response, next: any) {
   const includeRemoved = req.query.includeRemoved == "true";
@@ -68,13 +68,15 @@ async function addAccount(req: Request, res: Response, next: any) {
 
 async function setAccount(req: Request, res: Response, next: any) {
   try {
+    const accountParams = req.body as IAccount;
+    if (accountParams.status === AccountStatus.REMOVED)
+      return deleteAccount(req, res, next);
+
     const accountId = parseInt(req.params.id);
     if (!accountId) return res.status(400).json({ message: "id is required" });
 
     const token = controllerCommons.getToken(res) as Token;
     if (accountId !== token.accountId) return res.sendStatus(403);
-
-    const accountParams = req.body as IAccount;
 
     if (accountParams.password)
       accountParams.password = auth.hashPassword(accountParams.password);
@@ -128,9 +130,23 @@ async function deleteAccount(req: Request, res: Response, next: any) {
     const token = controllerCommons.getToken(res) as Token;
     if (accountId !== token.accountId) return res.sendStatus(403);
 
-    const account = await repository.findById(accountId);
+    const account = await repository.findByIdWithEmails(accountId);
 
     if (account == null) return res.status(404).end();
+
+    const accountEmails = account.get("accountEmails", {
+      plain: true,
+    }) as IAccountEmail[];
+
+    if (accountEmails && accountEmails.length > 0) {
+      const promises = accountEmails.map((item) => {
+        return emailService.removeEmailIdentity(item.email);
+      });
+
+      await Promise.all(promises);
+
+      await accountEmailRepository.removeAll(accountId);
+    }
 
     await emailService.removeEmailIdentity(account.domain);
 
