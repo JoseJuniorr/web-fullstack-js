@@ -25,6 +25,7 @@ function MainMenu({ history }) {
           <Nav>
             <Nav.Link href="/contacts">Contatos</Nav.Link>
             <Nav.Link href="/messages">Mensagens</Nav.Link>
+            <Nav.Link href="/settings">Minha Conta</Nav.Link>
           </Nav>
           <Nav>
             <Nav.Link onClick={handleLogout}>Sair</Nav.Link>

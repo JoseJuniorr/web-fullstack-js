@@ -15,6 +15,8 @@ import MessageListPage from "../pages/secure/MessageList";
 import MessageAddPage from "../pages/secure/MessagesAdd";
 import MessageDetailPage from "../pages/secure/MessageDetail";
 
+import SettingsDetailPage from "../pages/secure/SettingsDetails";
+
 export default function Routes() {
   return (
     <Router>
@@ -34,6 +36,7 @@ export default function Routes() {
           path="/messages/:messageId"
           component={MessageDetailPage}
         />
+        <RoutePrivate exact path="/settings" component={SettingsDetailPage} />
         <Route exact path="/signin" component={SignInPage} />
         <Route exact path="/signup" component={SignUpPage} />
       </Switch>
