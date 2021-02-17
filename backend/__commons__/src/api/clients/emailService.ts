@@ -42,7 +42,7 @@ function getDkimSettings(
   domain: string,
   response: AWS.SESV2.GetEmailIdentityResponse
 ) {
-  const dkimArray = response.DkimAttributes!.Tokens!.map((token) => {
+  const dkimArray = response.DkimAttributes!.Tokens!.map((token: string) => {
     return {
       type: "CNAME",
       name: `${token}._domainkey.${domain}`,

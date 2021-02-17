@@ -264,7 +264,7 @@ async function addAccountEmail(req: Request, res: Response, next: any) {
 async function getAccountEmails(req: Request, res: Response, next: any) {
   try {
     const token = controllerCommons.getToken(res) as Token;
-    const account = await accountRepository.findById(token.accountId);
+    const account = await accountRepository.findByIdWithEmails(token.accountId);
     if (!account) return res.status(404).end();
 
     let emails: string[] = [];
