@@ -19,7 +19,7 @@ class SignUp extends React.Component {
 
   handleSignUp = async (event) => {
     event.preventDefault();
-    const { name, email, password, domain} = this.state;
+    const { name, email, password, domain } = this.state;
 
     if (!name || !email || !domain || !password) {
       this.setState({ error: "Informe todos os campos para se cadastrar!" });
@@ -75,7 +75,7 @@ class SignUp extends React.Component {
 
                 <Form.Group controlId="domainGroup">
                   <Form.Control
-                    type="url"
+                    type="text"
                     placeholder="Informe o seu domínio"
                     onChange={(e) => this.setState({ domain: e.target.value })}
                   />
