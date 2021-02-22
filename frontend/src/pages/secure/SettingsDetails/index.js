@@ -1,8 +1,9 @@
 import React from "react";
 import Header from "../../../shared/header";
 import { PageContent } from "../../../shared/styles";
-import { Container, Row, Col, Table } from "react-bootstrap";
+import { Container, Row, Col, Table, Badge } from "react-bootstrap";
 import SettingsService from "../../../services/settings";
+import { Link } from "react-router-dom";
 
 class SettingsDetails extends React.Component {
   constructor(props) {
@@ -17,7 +18,7 @@ class SettingsDetails extends React.Component {
 
   async componentDidMount() {
     const service = new SettingsService();
-    const { DKIM, SPF, Domain, EmailAddresses } = await service.get();
+    const { DKIM, SPF, Domain, EmailAdresses } = await service.get();
 
     this.setState({
       isLoading: false,
@@ -25,7 +26,7 @@ class SettingsDetails extends React.Component {
         DKIM,
         SPF,
         Domain,
-        EmailAddresses,
+        EmailAdresses,
       },
     });
   }
@@ -107,11 +108,60 @@ class SettingsDetails extends React.Component {
                 {!isLoading && <RenderLines records={dnsSettings.SPF} />}
               </tbody>
             </Table>
+
+            <h4>Endereços de e-mail</h4>
+            <p>
+              Lista de endereços de e-mail configurado como remetente para
+              envio.
+            </p>
+            <Link className="btn btn-success mb-4" to={"settings/email/add"}>
+              Adicionar remetente
+            </Link>
+            <Table bordered striped hover>
+              <thead>
+                <tr>
+                  <th>E-mail</th>
+                </tr>
+              </thead>
+              <tbody>
+                {isLoading && <RenderLoaderRow />}
+                {!isLoading && (
+                  <RenderEmails records={dnsSettings.EmailAdresses} />
+                )}
+              </tbody>
+            </Table>
           </Container>
         </PageContent>
       </>
     );
   }
+}
+
+function RenderEmails({ records }) {
+  return (
+    <>
+      {records.length === 0 ? (
+        <RenderEmptyRow message="Nenhum e-mail cadastrado." />
+      ) : (
+        records.map((item, index) => (
+          <tr key={index}>
+            <td>
+              {item.email}
+              {item.verified ? (
+                <Badge className="ml-2" variant="success">
+                  e-mail verificado
+                </Badge>
+              ) : (
+                <Badge className="ml-2" variant="warning">
+                  aguardando verificação
+                </Badge>
+              )}
+            </td>
+          </tr>
+        ))
+      )}
+    </>
+  );
 }
 
 function RenderLines({ records }) {
