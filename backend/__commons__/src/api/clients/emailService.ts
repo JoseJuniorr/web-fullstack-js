@@ -11,14 +11,14 @@ export type DnsRecord = {
 
 export type DnsSettings = { dnsRecords: Array<DnsRecord>; verified: boolean };
 
+export type EmailSetting = { email: string; verified: boolean };
+
 export type AccountSettings = {
   Domain: DnsSettings;
   DKIM: DnsSettings;
   SPF: DnsSettings;
   EmailAdresses: EmailSetting[];
 };
-
-export type EmailSetting = { email: string; verified: boolean };
 
 async function addEmailIdentity(domainOrEmail: string) {
   const ses = new AWS.SESV2();
