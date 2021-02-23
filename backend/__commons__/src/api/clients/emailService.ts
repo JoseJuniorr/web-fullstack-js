@@ -17,7 +17,7 @@ export type AccountSettings = {
   Domain: DnsSettings;
   DKIM: DnsSettings;
   SPF: DnsSettings;
-  EmailAdresses: EmailSetting[];
+  EmailAddresses: EmailSetting[];
 };
 
 async function addEmailIdentity(domainOrEmail: string) {
@@ -122,7 +122,7 @@ async function getAccountSettings(domain: string, emails: string[]) {
     DKIM: dkimSettings,
     SPF: spfSettings,
     Domain: domainSettings,
-    EmailAdresses: emailAddresses,
+    EmailAddresses: emailAddresses,
   } as AccountSettings;
 }
 
