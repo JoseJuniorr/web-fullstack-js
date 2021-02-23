@@ -18,7 +18,7 @@ class SettingsDetails extends React.Component {
 
   async componentDidMount() {
     const service = new SettingsService();
-    const { DKIM, SPF, Domain, EmailAdresses } = await service.get();
+    const { DKIM, SPF, Domain, EmailAddresses } = await service.get();
 
     this.setState({
       isLoading: false,
@@ -26,7 +26,7 @@ class SettingsDetails extends React.Component {
         DKIM,
         SPF,
         Domain,
-        EmailAdresses,
+        EmailAddresses,
       },
     });
   }
@@ -126,7 +126,7 @@ class SettingsDetails extends React.Component {
               <tbody>
                 {isLoading && <RenderLoaderRow />}
                 {!isLoading && (
-                  <RenderEmails records={dnsSettings.EmailAdresses} />
+                  <RenderEmails records={dnsSettings.EmailAddresses} />
                 )}
               </tbody>
             </Table>

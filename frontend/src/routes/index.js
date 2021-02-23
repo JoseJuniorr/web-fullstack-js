@@ -16,6 +16,7 @@ import MessageAddPage from "../pages/secure/MessagesAdd";
 import MessageDetailPage from "../pages/secure/MessageDetail";
 
 import SettingsDetailPage from "../pages/secure/SettingsDetails";
+import SettingsEmailAddPage from "../pages/secure/SettingsEmailAdd";
 
 export default function Routes() {
   return (
@@ -37,6 +38,11 @@ export default function Routes() {
           component={MessageDetailPage}
         />
         <RoutePrivate exact path="/settings" component={SettingsDetailPage} />
+        <RoutePrivate
+          exact
+          path="/settings/email/add"
+          component={SettingsEmailAddPage}
+        />
         <Route exact path="/signin" component={SignInPage} />
         <Route exact path="/signup" component={SignUpPage} />
       </Switch>
