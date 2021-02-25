@@ -276,7 +276,12 @@ async function getAccountEmails(req: Request, res: Response, next: any) {
     }
 
     const settings = await emailService.getEmailSettings(emails);
-    res.json(settings);
+
+    accountEmails.forEach((item) => {
+      item.settings = settings.find((s) => s.email === item.email);
+    });
+
+    res.status(200).json(accountEmails);
   } catch (error) {
     console.log(`getAccountEmails: ${error}`);
     res.status(400).end();

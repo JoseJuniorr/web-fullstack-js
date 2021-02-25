@@ -19,6 +19,10 @@ const Message = database.define<IMessageModel>("message", {
     type: Sequelize.INTEGER.UNSIGNED,
     allowNull: false,
   },
+  accountEmailId: {
+    type: Sequelize.INTEGER.UNSIGNED,
+    allowNull: false,
+  },
   subject: {
     type: Sequelize.STRING(150),
     allowNull: false,
