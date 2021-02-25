@@ -1,17 +1,10 @@
 import React from "react";
 import Header from "../../../shared/header";
 import { PageContent } from "../../../shared/styles";
-import {
-  Container,
-  Row,
-  Col,
-  Badge,
-  Form,
-  Button,
-  Alert,
-} from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { Link, withRouter } from "react-router-dom";
 import MessageService from "../../../services/messages";
+import SettingsService from "../../../services/settings";
 
 class MessagesAdd extends React.Component {
   constructor(props) {
@@ -22,22 +15,39 @@ class MessagesAdd extends React.Component {
       subject: "",
       body: "",
       error: "",
+      accountEmailId: "",
+      emailsFrom: [],
     };
+  }
+
+  async componentDidMount() {
+    const service = new SettingsService();
+
+    this.setState({
+      isLoading: true,
+    });
+    const result = await service.getAllAccountEmail();
+    console.log(result);
+
+    this.setState({
+      isLoading: false,
+      emailsFrom: result,
+    });
   }
 
   handleSave = async (event) => {
     event.preventDefault();
 
-    const { subject, body } = this.state;
+    const { subject, body, accountEmailId } = this.state;
 
-    if (!subject || !body) {
+    if (!subject || !body || !accountEmailId) {
       this.setState({
         error: "Informe todos os campos para adicionar a mensagem",
       });
     } else {
       try {
         const service = new MessageService();
-        await service.add({ subject, body });
+        await service.add({ subject, body, accountEmailId });
 
         this.props.history.push("/messages");
       } catch (error) {
@@ -53,6 +63,7 @@ class MessagesAdd extends React.Component {
   };
 
   render() {
+    const { isLoading, emailsFrom, accountEmailId } = this.state;
     return (
       <>
         <Header />
@@ -77,6 +88,27 @@ class MessagesAdd extends React.Component {
                         this.setState({ subject: e.target.value })
                       }
                     />
+                  </Form.Group>
+                  <Form.Group>
+                    <Form.Label>Remetente:</Form.Label>
+                    <Form.Control
+                      as="select"
+                      disabled={isLoading}
+                      value={!isLoading && accountEmailId}
+                      onChange={(e) =>
+                        this.setState({ accountEmailId: e.target.value })
+                      }
+                    >
+                      <option key="0" value="">
+                        Selecione
+                      </option>
+                      {!isLoading &&
+                        emailsFrom.map((item) => (
+                          <option key={item.id} value={item.id}>
+                            {item.email}
+                          </option>
+                        ))}
+                    </Form.Control>
                   </Form.Group>
                   <Form.Group>
                     <Form.Label>Corpo da mensagem:</Form.Label>

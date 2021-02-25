@@ -1,9 +1,11 @@
 import React from "react";
 import Header from "../../../shared/header";
 import { PageContent } from "../../../shared/styles";
-import MessageService from "../../../services/messages";
 import { Container, Badge, Button } from "react-bootstrap";
 import { withRouter } from "react-router-dom";
+
+import MessageService from "../../../services/messages";
+import SettingsService from "../../../services/settings";
 
 function RenderMessageStatus({ status }) {
   let statusName = {};
@@ -45,6 +47,11 @@ function RenderMessage({ message }) {
         {message.subject}
       </p>
       <p>
+        <b>E-mail do remetente:</b>
+        <br />
+        {message.fromName} ({message.fromEmail})
+      </p>
+      <p>
         <b>Conteúdo:</b>
         <br />
         {message.body}
@@ -69,10 +76,20 @@ class MessageDetail extends React.Component {
       params: { messageId },
     } = this.props.match;
 
-    const service = new MessageService();
-    const result = await service.getOne(messageId);
+    const messageService = new MessageService();
 
-    this.setState({ message: result, isLoading: false });
+    const settingsService = new SettingsService();
+
+    const message = await messageService.getOne(messageId);
+    const {
+      name: fromName,
+      email: fromEmail,
+    } = await settingsService.getOneAccountEmail(message.accountEmailId);
+
+    this.setState({
+      message: { ...message, fromName, fromEmail },
+      isLoading: false,
+    });
   }
 
   handleSendMessage = async (messageId) => {
