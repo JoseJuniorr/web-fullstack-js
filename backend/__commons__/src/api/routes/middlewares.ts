@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Joi from "joi";
-import auth from "../auth";
+import accountAuth from "../auth/accountsAuth";
+import microservicesAuth from "../auth/microservicesAuth";
 
 function validateSchema(
   schema: Joi.ObjectSchema<any>,
@@ -22,21 +23,46 @@ function validateSchema(
   });
 }
 
-async function validateAuth(req: Request, res: Response, next: any) {
+async function validateAccountAuth(req: Request, res: Response, next: any) {
   try {
     const token = req.headers["x-access-token"] as string;
     if (!token) return res.sendStatus(401);
 
-    const payload = await auth.verify(token);
+    const payload = await accountAuth.verify(token);
     if (!payload) return res.sendStatus(401);
 
     res.locals.payload = payload;
 
     next();
   } catch (error) {
-    console.log(`validateAuth: ${error}`);
+    console.log(`validateAccountAuth: ${error}`);
     res.sendStatus(400);
   }
 }
 
-export default { validateSchema, validateAuth };
+async function validateMicroserviceAuth(
+  req: Request,
+  res: Response,
+  next: any
+) {
+  try {
+    const token = req.headers["x-access-token"] as string;
+    if (!token) return res.sendStatus(401);
+
+    const payload = await microservicesAuth.verify(token);
+    if (!payload) return res.sendStatus(401);
+
+    res.locals.payload = payload;
+
+    next();
+  } catch (error) {
+    console.log(`validateMicroserviceAuth: ${error}`);
+    res.sendStatus(400);
+  }
+}
+
+export default {
+  validateSchema,
+  validateAccountAuth,
+  validateMicroserviceAuth,
+};

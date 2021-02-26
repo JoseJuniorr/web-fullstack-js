@@ -2,11 +2,18 @@ import { Request, Response } from "express";
 import repository from "../models/messageRepository";
 import controllerCommons from "ms-commons/api/controllers/controller";
 import { IMessage } from "../models/message";
-import { Token } from "ms-commons/api/auth";
+import { Token } from "ms-commons/api/auth/accountsAuth";
 import { MessageStatus } from "../models/messageStatus";
-import { getContacts } from "ms-commons/api/clients/contactsService";
-import queueService from "../queueService";
+import {
+  getContacts,
+  getContact,
+} from "ms-commons/api/clients/contactsService";
+import queueService from "ms-commons/api/clients/queueService";
 import { IQueueMessage } from "../models/queueMessage";
+import sendingRepository from "../models/sendingRepository";
+import { SendingStatus } from "../models/sendingStatus";
+import { ISending } from "../models/sending";
+import messageRepository from "../models/messageRepository";
 
 async function getMessage(req: Request, res: Response, next: any) {
   try {
@@ -74,7 +81,7 @@ async function deleteMessage(req: Request, res: Response, next: any) {
 
     if (req.query.force === "true") {
       await repository.removeById(messageId, token.accountId);
-      res.status(200).end();
+      res.sendStatus(204);
     } else {
       const messageParams = {
         status: MessageStatus.REMOVED,
@@ -94,7 +101,7 @@ async function deleteMessage(req: Request, res: Response, next: any) {
   }
 }
 
-async function sendMessage(req: Request, res: Response, next: any) {
+async function scheduleMessage(req: Request, res: Response, next: any) {
   try {
     const token = controllerCommons.getToken(res) as Token;
     // console.log(token);
@@ -105,26 +112,47 @@ async function sendMessage(req: Request, res: Response, next: any) {
 
     const message = await repository.findById(messageId, token.accountId);
 
-    if (!message) return res.status(403).end();
+    if (!message) return res.sendStatus(403);
 
     //obtendo os contatos
     const contacts = await getContacts(token.jwt!);
-    if (!contacts || contacts.length === 0) return res.status(400).end();
+    if (!contacts || contacts.length === 0)
+      return res
+        .status(404)
+        .json({ message: "There are no contacts for this account." });
 
-    //enviar a mensagem para a fila
-    const promisses = contacts.map((contact) => {
-      return queueService.sendMessage({
-        messageId: messageId,
-        contactId: contact.id,
-        accountId: token.accountId,
-      } as IQueueMessage);
+    //criar as sendings
+    const sendings = await sendingRepository.addAll(
+      contacts.map((contact) => {
+        return {
+          accountId: token.accountId,
+          contactId: contact.id,
+          messageId,
+          status: SendingStatus.QUEUED,
+        };
+      })
+    );
+
+    if (!sendings)
+      return res.status(400).json({ message: "Couldn't save the sendings." });
+
+    //simplificar o sendings para a fila
+    const messages = sendings.map((item) => {
+      return {
+        id: item.id,
+        accountId: item.accountId,
+        contactId: item.contactId,
+        messageId: item.messageId,
+      } as IQueueMessage;
     });
 
+    //enviar a mensagem para a fila
+    const promisses = queueService.sendMessageBatch(messages);
     await Promise.all(promisses);
 
     //atualizando a mensagem
     const messageParams = {
-      status: MessageStatus.SENT,
+      status: MessageStatus.SCHEDULED,
       sendDate: new Date(),
     } as IMessage;
 
@@ -134,11 +162,49 @@ async function sendMessage(req: Request, res: Response, next: any) {
       token.accountId
     );
 
-    if (updatedMessage) return res.status(200).json(updatedMessage);
+    if (updatedMessage) return res.status(202).json(updatedMessage);
     else return res.sendStatus(403);
   } catch (error) {
     console.log(`sendMessage: ${error}`);
     res.sendStatus(400);
+  }
+}
+
+async function sendMessage(req: Request, res: Response, next: any) {
+  try {
+    const params = req.body as ISending;
+
+    //pegando o envio
+    const sending = await sendingRepository.findQueuedOne(
+      params.id!,
+      params.messageId,
+      params.accountId,
+      params.contactId
+    );
+
+    if (!sending) return res.status(404).json({ message: "sending not found" });
+
+    //todo: implementar cache no futuro
+
+    //pegando a mensagem
+    const message = await messageRepository.findById(
+      sending.messageId,
+      sending.accountId
+    );
+    if (!message) return res.status(404).json({ message: "message not found" });
+
+    //pegando o contato(destinatário)
+    const contact = await getContact(sending.contactId, sending.accountId);
+    if (!contact) return res.status(404).json({ message: "contact not found" });
+
+    //pegando o account email Remetente
+
+    //enviando o email (SES)
+
+    //atualizando a message
+  } catch (error) {
+    console.log(`sendMessage: ${error}`);
+    return res.status(400);
   }
 }
 
@@ -148,5 +214,6 @@ export default {
   addMessage,
   setMessage,
   deleteMessage,
+  scheduleMessage,
   sendMessage,
 };

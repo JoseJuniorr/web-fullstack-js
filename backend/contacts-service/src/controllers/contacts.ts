@@ -4,7 +4,7 @@ import controllerCommons from "ms-commons/api/controllers/controller";
 import { IContact } from "../models/contact";
 import { ContactStatus } from "../models/contactStatus";
 
-import { Token } from "ms-commons/api/auth";
+import { Token } from "ms-commons/api/auth/accountsAuth";
 
 async function getContacts(req: Request, res: Response, next: any) {
   try {
@@ -22,10 +22,15 @@ async function getContact(req: Request, res: Response, next: any) {
   try {
     const id = parseInt(req.params.id);
 
-    if (!id) return res.status(400).json({ message: "id is required" });
+    if (!id) return res.status(400).json({ message: "contact id is required" });
 
-    const token = controllerCommons.getToken(res) as Token;
-    const contact = await repository.findById(id, token.accountId);
+    let accountId = parseInt(req.params.accountId);
+    if (!accountId) {
+      const token = controllerCommons.getToken(res) as Token;
+      accountId = token.accountId;
+    }
+
+    const contact = await repository.findById(id, accountId);
     if (contact === null) return res.sendStatus(404);
     else res.status(200).json(contact);
   } catch (error) {
