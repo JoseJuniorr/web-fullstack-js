@@ -1,4 +1,4 @@
-import { Token } from "ms-commons/api/auth";
+import { Token } from "ms-commons/api/auth/accountsAuth";
 import controllerCommons from "ms-commons/api/controllers/controller";
 import { Request, Response } from "express";
 import { IAccount } from "./../models/account";
