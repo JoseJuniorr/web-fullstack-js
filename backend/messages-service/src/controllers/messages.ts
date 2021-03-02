@@ -14,6 +14,7 @@ import sendingRepository from "../models/sendingRepository";
 import { SendingStatus } from "../models/sendingStatus";
 import { ISending } from "../models/sending";
 import messageRepository from "../models/messageRepository";
+import { getAccountEmail } from "ms-commons/api/clients/accountsService";
 
 async function getMessage(req: Request, res: Response, next: any) {
   try {
@@ -198,6 +199,13 @@ async function sendMessage(req: Request, res: Response, next: any) {
     if (!contact) return res.status(404).json({ message: "contact not found" });
 
     //pegando o account email Remetente
+    const accountEmail = await getAccountEmail(
+      sending.accountId,
+      message.accountEmailId
+    );
+
+    if (!accountEmail)
+      return res.status(404).json({ message: "accountEmail not found" });
 
     //enviando o email (SES)
 

@@ -61,6 +61,7 @@ router.patch(
 /**
  * DELETE /contacts/:id
  * Remove one contact from the account
+ * ?force=true to really remove
  */
 router.delete(
   "/contacts/:id",

@@ -54,7 +54,8 @@ router.patch(
 
 /*
  *DELETE /messages/:id
- *Remove one message from this account
+ *Remove one message from this account - soft delete
+ ?force=true to really remove
  */
 router.delete(
   "/messages/:id",

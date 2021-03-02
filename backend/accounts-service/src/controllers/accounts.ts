@@ -290,14 +290,20 @@ async function getAccountEmails(req: Request, res: Response, next: any) {
 
 async function getAccountEmail(req: Request, res: Response, next: any) {
   try {
-    const id = parseInt(req.params.id);
-    if (!id) return res.status(400).end();
+    let accountId = parseInt(req.params.accountId);
 
-    const token = controllerCommons.getToken(res) as Token;
+    if (!accountId) {
+      const token = controllerCommons.getToken(res) as Token;
+      accountId = token.accountId;
+    }
+
+    const accountEmailId = parseInt(req.params.accountEmailId);
+    if (!accountId || !accountEmailId)
+      return res.status(400).json({ message: "Both id are required" });
 
     const accountEmail = (await accountEmailRepository.findById(
-      id,
-      token.accountId,
+      accountEmailId,
+      accountId,
       true
     )) as IAccountEmail;
 
@@ -305,7 +311,7 @@ async function getAccountEmail(req: Request, res: Response, next: any) {
     const settings = await emailService.getEmailSettings([accountEmail.email]);
     if (!settings || settings.length === 0) return res.status(404).end();
     accountEmail.settings = settings[0];
-    res.json(accountEmail);
+    res.status(200).json(accountEmail);
   } catch (error) {
     console.log(`getAccountEmail: ${error}`);
     res.status(400).end();
