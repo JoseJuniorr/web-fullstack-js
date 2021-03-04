@@ -15,6 +15,7 @@ import { SendingStatus } from "../models/sendingStatus";
 import { ISending } from "../models/sending";
 import messageRepository from "../models/messageRepository";
 import { getAccountEmail } from "ms-commons/api/clients/accountsService";
+import emailService from "ms-commons/api/clients/emailService";
 
 async function getMessage(req: Request, res: Response, next: any) {
   try {
@@ -208,8 +209,37 @@ async function sendMessage(req: Request, res: Response, next: any) {
       return res.status(404).json({ message: "accountEmail not found" });
 
     //enviando o email (SES)
+    const result = await emailService.sendEmail(
+      accountEmail.name,
+      accountEmail.email,
+      contact.email,
+      message.subject,
+      message.body
+    );
+
+    if (!result.success)
+      return res
+        .status(400)
+        .json({ message: "Couldn't send the email message" });
+
+    sending.status = SendingStatus.SENT;
+    sending.sendDate = new Date();
+
+    await sendingRepository.set(params.id!, sending, sending.accountId);
 
     //atualizando a message
+    const hasMore = await sendingRepository.hasQueuedSendings(
+      sending.messageId,
+      sending.accountId
+    );
+
+    if (!hasMore) {
+      message.status = MessageStatus.SENT;
+      message.sendDate = new Date();
+      await repository.set(sending.messageId, message, sending.accountId);
+    }
+
+    res.status(202).json(sending);
   } catch (error) {
     console.log(`sendMessage: ${error}`);
     return res.status(400);
