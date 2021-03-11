@@ -1,3 +1,7 @@
+// require("dotenv-safe").config({
+//   example: "../.env.example",
+//   path: "../.env",
+// });
 import request from "supertest";
 import app from "../src/app";
 import { IAccount } from "../src/models/account";
@@ -70,7 +74,7 @@ describe("Testando as rotas do accounts/settings", () => {
     expect(resultado.body).toBeTruthy();
   });
 
-  it("POST /accounts/settings - Deve retornar statusCode 201", async () => {
+  it("POST /accounts/settings?force=true - Deve retornar statusCode 201", async () => {
     const resultado = await request(app)
       .post("/accounts/settings?force=true")
       .set("x-access-token", jwt);
@@ -270,13 +274,13 @@ describe("Testando as rotas do accounts/settings/accountsEmail", () => {
     expect(resultado.status).toEqual(422);
   });
 
-  it("DELETE /accounts/settings/accountEmails/:id - Deve retornar statusCode 200", async () => {
+  it("DELETE /accounts/settings/accountEmails/:id - Deve retornar statusCode 204", async () => {
     const resultado = await request(app)
       .delete("/accounts/settings/accountEmails/" + testAccountEmailId2)
 
       .set("x-access-token", jwt2);
 
-    expect(resultado.status).toEqual(200);
+    expect(resultado.status).toEqual(204);
   });
 
   it("DELETE /accounts/settings/accountEmails/:id - Deve retornar statusCode 400", async () => {

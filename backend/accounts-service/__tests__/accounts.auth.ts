@@ -1,3 +1,7 @@
+// require("dotenv-safe").config({
+//   example: "../.env.example",
+//   path: "../.env",
+// });
 import supertest from "supertest";
 import app from ".././src/app";
 import { IAccount } from "../src/models/account";
@@ -15,6 +19,7 @@ let jwt: string = "";
 let testAccountId = 0;
 
 beforeAll(async () => {
+  
   const testAccount: IAccount = {
     name: "jest",
     email: testEmail,

@@ -5,7 +5,7 @@ import { IContact } from "../src/models/contact";
 import repository from "../src/models/contactRepository";
 import { ContactStatus } from "../src/models/contactStatus";
 
-const testEmail = "contact@contacts.com";
+const testEmail = "contact@contacts.test.com";
 const testEmail2 = "contact2@gmail.com";
 const testPassword = "123456";
 
@@ -14,6 +14,8 @@ let testAccountId: number = 0;
 let testContactId: number = 0;
 
 beforeAll(async () => {
+  jest.setTimeout(10000);
+
   const testAccount = {
     name: "jest test account",
     email: testEmail,
@@ -29,7 +31,7 @@ beforeAll(async () => {
 
   const result = await request(accountsApp).post("/accounts/login").send({
     email: testEmail,
-    password: '123456',
+    password: "123456",
   });
 
   jwt = result.body.token;
@@ -45,6 +47,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  jest.setTimeout(10000);
+
   const removeResult = await repository.removeByEmail(testEmail, testAccountId);
   const removeResult2 = await repository.removeByEmail(
     testEmail2,
@@ -104,14 +108,13 @@ describe("testando rotas do contacts", () => {
     expect(resultado.status).toEqual(401);
   });
 
-  // it("GET /contacts/:id - Retorna statusCode 400", async () => {
-  //   const resultado = await request(app)
-  //     .get("/contacts/abc")
-  //     .set("x-access-token", jwt);
+  it("GET /contacts/:id - Retorna statusCode 400", async () => {
+    const resultado = await request(app)
+      .get("/contacts/abc")
+      .set("x-access-token", jwt);
 
-  //   expect(resultado.status).toEqual(400);
-
-  // });
+    expect(resultado.status).toEqual(400);
+  });
 
   it("POST /contacts/ - Retorna statusCode 201", async () => {
     const testContact = {

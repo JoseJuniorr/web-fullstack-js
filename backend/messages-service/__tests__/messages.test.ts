@@ -4,9 +4,11 @@ import accountsApp from "../../accounts-service/src/app";
 import { IMessage } from "../src/models/message";
 import repository from "../src/models/messageRepository";
 import { MessageStatus } from "../src/models/messageStatus";
+import { IAccountEmail } from "../../accounts-service/src/models/accountEmail";
 
-const testEmail = "jest@gmail.com";
-const testEmail2 = "jest2@gmail.com";
+const testDomain = "jest.test.com";
+const testEmail = `jest@${testDomain}`;
+
 const testPassword = "123456";
 
 let jwt: string = "";
@@ -15,12 +17,15 @@ let testAccountId: number = 0;
 let testMessageId: number = 0;
 let testMessageId2: number = 0;
 
+let testAccountEmailId: number = 0;
+
 beforeAll(async () => {
+  jest.setTimeout(10000);
   const testAccount = {
     name: "jest",
     email: testEmail,
     password: testPassword,
-    domain: "jest.com",
+    domain: testDomain,
   };
 
   const account = await request(accountsApp)
@@ -36,19 +41,38 @@ beforeAll(async () => {
 
   jwt = result.body.token;
 
+  const testAccountEmail: IAccountEmail = {
+    name: "jest",
+    email: testEmail,
+    accountId: testAccountId,
+  };
+
+  const accountEmailResponse = await request(accountsApp)
+    .put("/accounts/settings/accountEmails")
+    .send(testAccountEmail)
+    .set("x-access-token", jwt);
+
+  console.log(`accountEmailResponse: ${accountEmailResponse.status}`);
+
+  if (accountEmailResponse.status !== 201) throw new Error();
+  testAccountEmailId = accountEmailResponse.body.id;
+
   //cadastro de message
   const testMessage = {
     accountId: testAccountId,
     body: "corpo da mensagem",
-
     subject: "assunto da mensagem",
+    accountEmailId: testAccountEmailId,
   } as IMessage;
+
   const addResult = await repository.add(testMessage, testAccountId);
   console.log(`addResult: ${addResult}`);
   testMessageId = addResult.id!;
 });
 
 afterAll(async () => {
+  jest.setTimeout(10000);
+
   const removeResult = await repository.removeById(
     testMessageId,
     testAccountId
@@ -59,6 +83,16 @@ afterAll(async () => {
   );
 
   console.log(`RemoveResult: ${removeResult}: RemoveResult2: ${removeResult2}`);
+
+  const deleteAccountEmailResponse = await request(accountsApp)
+    .delete(
+      `/accounts/settings/accountEmails/${testAccountEmailId}/?force=true`
+    )
+    .set("x-access-token", jwt);
+
+  console.log(
+    `deleteAccountEmailResponse: ${deleteAccountEmailResponse.status}`
+  );
 
   const deleteResponse = await request(accountsApp)
     .delete(`/accounts/${testAccountId}?force=true`)
@@ -124,6 +158,7 @@ describe("testando rotas do messages", () => {
       accountId: testAccountId,
       subject: "outro subject",
       body: "outro body",
+      accountEmailId: testAccountEmailId,
     } as IMessage;
 
     const resultado = await request(app)
@@ -234,12 +269,12 @@ describe("testando rotas do messages", () => {
     expect(resultado.body.status).toEqual(MessageStatus.REMOVED);
   });
 
-  it("DELETE /messages/:id?force=true - Deve retornar statusCode 200", async () => {
+  it("DELETE /messages/:id?force=true - Deve retornar statusCode 204", async () => {
     const resultado = await request(app)
       .delete(`/messages/${testMessageId}?force=true`)
       .set("x-access-token", jwt);
 
-    expect(resultado.status).toEqual(200);
+    expect(resultado.status).toEqual(204);
   });
 
   it("DELETE /messages/:id - Deve retornar statusCode 403", async () => {

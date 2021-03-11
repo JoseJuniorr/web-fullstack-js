@@ -87,7 +87,7 @@ async function deleteContact(req: Request, res: Response, next: any) {
         contactParams,
         token.accountId
       );
-      if (updatedContact) res.json(updatedContact);
+      if (updatedContact) res.status(200).json(updatedContact);
       else res.status(403).end();
     }
   } catch (error) {

@@ -1,4 +1,3 @@
-import { stringValue } from "aws-sdk/clients/iot";
 import jwt from "jsonwebtoken";
 
 const SECRET: string = `${process.env.MS_JWT_SECRET}`;

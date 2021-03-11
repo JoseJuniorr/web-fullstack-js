@@ -5,7 +5,7 @@ import cors from "cors";
 import logger from "morgan";
 
 function getCorsOrigin() {
-  const origin = process.env.CORS_ORIGIN;
+  const origin = "*";
 
   if (!origin) throw new Error("CORS_ORIGIN is a required env var");
 

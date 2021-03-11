@@ -152,7 +152,7 @@ async function deleteAccount(req: Request, res: Response, next: any) {
 
     if (req.query.force === "true") {
       await repository.remove(accountId);
-      res.status(200).end();
+      res.status(204).end();
     } else {
       const accountParams = {
         status: AccountStatus.REMOVED,
@@ -360,7 +360,7 @@ async function deleteAccountEmail(req: Request, res: Response, next: any) {
     await emailService.removeEmailIdentity(accountEmail.email);
 
     await accountEmailRepository.remove(accountEmailId, token.accountId);
-    res.status(200).end();
+    res.status(204).end();
   } catch (error) {
     console.log(`deleteAccountEmail: ${error}`);
     res.sendStatus(400);

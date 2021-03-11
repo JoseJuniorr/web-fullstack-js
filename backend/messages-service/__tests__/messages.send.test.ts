@@ -5,20 +5,35 @@ import contactsApp from "../../contacts-service/src/app";
 import { IMessage } from "../src/models/message";
 import repository from "../src/models/messageRepository";
 import { MessageStatus } from "../src/models/messageStatus";
+import { IAccountEmail } from "../../accounts-service/src/models/accountEmail";
 
-const testEmail = "jest@messages.com";
+const testDomain = "jest.send.com";
+const testEmail = `jest@${testDomain}`;
 const testPassword = "123456";
 let jwt: string = "";
 let testAccountId: number = 0;
 let testMessageId: number = 0;
 let testContactId: number = 0;
+let testAccountEmailId: number = 0;
 
+// import microservicesAuth from "../../__commons__/src/api/auth/microservicesAuth";
+
+// // const token = microservicesAuth.sign({
+// //   id: "bdb5353d-c079-4789-a60a-f208578f1182",
+// //   contactId: 1,
+// //   accountId: 2,
+// //   messageId: 3,
+// // });
+
+// console.log(token);
 beforeAll(async () => {
+  jest.setTimeout(10000);
+
   const testAccount = {
     name: "jest",
     email: testEmail,
     password: testPassword,
-    domain: "jest.com",
+    domain: "jest.send.com",
   };
 
   const account = await request(accountsApp)
@@ -36,6 +51,22 @@ beforeAll(async () => {
 
   console.log(`loginResponse: ${loginResponse.status}`);
   jwt = loginResponse.body.token;
+
+  const testAccountEmail: IAccountEmail = {
+    name: "jest",
+    email: testEmail,
+    accountId: testAccountId,
+  };
+
+  const accountEmailResponse = await request(accountsApp)
+    .put("/accounts/settings/accountEmails")
+    .send(testAccountEmail)
+    .set("x-access-token", jwt);
+
+  console.log(`accountEmailResponse: ${accountEmailResponse.status}`);
+
+  if (accountEmailResponse.status !== 201) throw new Error();
+  testAccountEmailId = accountEmailResponse.body.id;
 
   const testContact = {
     accountId: testAccountId,
@@ -56,6 +87,7 @@ beforeAll(async () => {
     accountId: testAccountId,
     subject: "assunto da mensagem",
     body: "corpo da mensagem",
+    accountEmailId: testAccountEmailId,
   } as IMessage;
 
   const addResult = await repository.add(testMessage, testAccountId);
@@ -65,6 +97,8 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
+  jest.setTimeout(10000);
+
   const removeResult = await repository.removeById(
     testMessageId,
     testAccountId
@@ -91,14 +125,14 @@ afterAll(async () => {
 });
 
 describe("testando rotas do messages", () => {
-  it("POST /messages/:id/send - Retorna statusCode 200", async () => {
+  it("POST /messages/:id/send - Retorna statusCode 202", async () => {
     const resultado = await request(app)
       .post(`/messages/${testMessageId}/send`)
       .set("x-access-token", jwt);
 
-    expect(resultado.status).toEqual(200);
+    expect(resultado.status).toEqual(202);
     expect(resultado.body.id).toEqual(testMessageId);
-    expect(resultado.body.status).toEqual(MessageStatus.SENT);
+    expect(resultado.body.status).toEqual(MessageStatus.SCHEDULED);
   });
 
   it("POST /messages/:id/send - Retorna statusCode 401", async () => {

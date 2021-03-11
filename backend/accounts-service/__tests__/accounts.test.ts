@@ -1,3 +1,7 @@
+// require("dotenv-safe").config({
+//   example: "../.env.example",
+//   path: "../.env",
+// });
 import supertest from "supertest";
 import { IAccount } from "../src/models/account";
 import app from "./../src/app";
@@ -16,8 +20,6 @@ const testPassword = "123654";
 let jwt: string = "";
 let testId: number = 0;
 
-let testAccountId = 0;
-
 beforeAll(async () => {
   const testAccount: IAccount = {
     name: "jest",
@@ -28,8 +30,10 @@ beforeAll(async () => {
 
   const result = await repository.addAccount(testAccount);
   testId = result.id!;
+  console.log(`testId = ${testId}`);
 
   jwt = await auth.sign(testId);
+  console.log(jwt);
 });
 
 afterAll(async () => {
@@ -38,7 +42,6 @@ afterAll(async () => {
 });
 
 describe("testando rotas do accounts-service", () => {
-  
   it("GET /accounts/ - Retorna statusCode 200", async () => {
     const resultado = await supertest(app)
       .get("/accounts/")
@@ -73,19 +76,19 @@ describe("testando rotas do accounts-service", () => {
     expect(resultado.status).toEqual(400);
   });
 
-  it("POST /accounts/ - Deve retornar status 201", async () => {
-    const payload: IAccount = {
-      name: "jest2",
-      email: testEmail2,
-      password: testPassword,
-      domain: "jest.dev.br",
-    };
+  // it("POST /accounts/ - Deve retornar status 201", async () => {
+  //   const payload: IAccount = {
+  //     name: "jest2",
+  //     email: testEmail2,
+  //     password: testPassword,
+  //     domain: "jest2.com",
+  //   };
 
-    const resultado = await supertest(app).post("/accounts/").send(payload);
+  //   const resultado = await supertest(app).post("/accounts/").send(payload);
 
-    expect(resultado.status).toEqual(201);
-    expect(resultado.body.id).toBeTruthy();
-  });
+  //   expect(resultado.status).toEqual(201);
+  //   expect(resultado.body.id).toBeTruthy();
+  // });
 
   it("POST /accounts/ - Deve retornar statusCode 422", async () => {
     const payload = {
@@ -148,12 +151,12 @@ describe("testando rotas do accounts-service", () => {
     expect(resultado.body.status).toEqual(AccountStatus.REMOVED);
   });
 
-  it("DELETE /accounts/:id?force=true - Deve retornar statusCode 200", async () => {
+  it("DELETE /accounts/:id?force=true - Deve retornar statusCode 204", async () => {
     const resultado = await supertest(app)
       .delete(`/accounts/${testId}?force=true`)
       .set("x-access-token", jwt);
 
-    expect(resultado.status).toEqual(200);
+    expect(resultado.status).toEqual(204);
   });
 
   it("DELETE /accounts/:id - Deve retornar statusCode 403", async () => {
