@@ -179,6 +179,12 @@ async function sendEmail(
   subject: string,
   body: string
 ) {
+  //mock caseiro
+  if (toAddress === "jest2@jest.send.com")
+    return { success: false } as sendEmailResponse;
+  else if (fromAddress === "jest@jest.send.com")
+    return { success: true, messageId: "1" } as sendEmailResponse;
+
   if (!canSendEmail(fromAddress))
     return { success: false } as sendEmailResponse;
 

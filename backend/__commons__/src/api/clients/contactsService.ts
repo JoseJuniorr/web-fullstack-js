@@ -31,7 +31,7 @@ export async function getContact(contactId: number, accountId: number) {
   try {
     const config = {
       headers: {
-        "x-access-token": microservicesAuth.sign({ accountId, contactId }),
+        "x-access-token": await microservicesAuth.sign({ accountId, contactId }),
       },
     };
 

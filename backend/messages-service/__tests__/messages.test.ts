@@ -1,5 +1,5 @@
 import request from "supertest";
-import app from "./../src/app";
+import app from "../src/app";
 import accountsApp from "../../accounts-service/src/app";
 import { IMessage } from "../src/models/message";
 import repository from "../src/models/messageRepository";
