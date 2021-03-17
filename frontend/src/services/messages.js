@@ -7,7 +7,7 @@ class MessageService {
   }
 
   async getAll() {
-    const result = await this.api.get("messages");
+    const result = await this.api.get("messages/?includeRemoved=true");
 
     return result.data;
   }

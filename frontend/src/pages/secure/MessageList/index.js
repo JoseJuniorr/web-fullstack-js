@@ -12,6 +12,9 @@ function RenderMessageStatus({ status }) {
     case 100:
       statusName = { title: "CRIADA", css: "primary" };
       break;
+    case 150:
+      statusName = { title: "AGENDADA", css: "warning" };
+      break;
     case 200:
       statusName = { title: "ENVIADA", css: "success" };
       break;
