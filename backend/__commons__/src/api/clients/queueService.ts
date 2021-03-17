@@ -8,7 +8,7 @@ async function sendMessage(message: any) {
     .sendMessage({
       MessageBody: JSON.stringify(message),
       QueueUrl: `${process.env.AWS_QUEUE_URL}`,
-      // MessageGroupId: `${process.env.AWS_MESSAGE_GROUP}`,
+      MessageGroupId: `${process.env.AWS_MESSAGE_GROUP}`,
     })
     .promise();
 }
@@ -24,7 +24,7 @@ function sendMessageBatch(messages: any[]) {
   const pageSize = 10;
   const qtdPages = Math.ceil(messages.length / pageSize);
 
-  for (let x = 1; x < qtdPages; x++) {
+  for (let x = 1; x <= qtdPages; x++) {
     const messagesPage = paginate(messages, pageSize, x);
 
     const entries = messagesPage.map((item) => {
