@@ -1,11 +1,13 @@
 service: mailshrimp
 app: mailshrimp
 org: josejuniorr
+
 frameworkVersion: "2"
 
 provider:
   name: aws
   stage: dev
+  lambdaHashingVersion: 20201221
   runtime: nodejs12.x
   iamRoleStatements:
     - Effect: "Allow"
@@ -21,14 +23,17 @@ provider:
     PROJECT: mailshrimp
 
   deploymentBucket:
-    name: mailshrimp-dev-serverlessdeploymentbucket-kwhg3opfb5t7
+    name: ${self:service}-prd-deployment
     tags:
       STAGE: ${self:provider.stage}
       PROJETO: ${self:service}
 
-  plugins:
-    serverless-layers:
-      dependenciesPath: ./package.json
+plugin:
+  - serverless-layers
+
+custom:
+  serverless-layers:
+    dependenciesPath: ./package.json
 
 functions:
   send-message:
@@ -36,8 +41,8 @@ functions:
     description: "Envia o e-mail"
     handler: src/handlers/send-message/index.sendMessage
     memorySize: 128
-    timeout: 30
+    timeout: 60
     events:
       - sqs:
-          arn: arn:aws:sqs:us-east-1:400016104213:mailshrimp
+          arn: arn:aws:sqs:us-east-1:400016104213:Mailshrimp.fifo
           batchSize: 1

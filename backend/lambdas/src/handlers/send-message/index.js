@@ -19,7 +19,7 @@ async function main(event) {
       const msJWT = await jwt.sign(payload);
 
       const options = {
-        url: `${process.env.MS_URL_MESSAGES}/messages/sendings`,
+        url: `${process.env.MS_URL_MESSAGES}/messages/sending`,
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -53,4 +53,4 @@ async function main(event) {
   }
 }
 
-module.exports = sendMessage = main;
+module.exports.sendMessage = main;
