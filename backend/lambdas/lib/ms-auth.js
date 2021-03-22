@@ -12,4 +12,4 @@ async function sign(token) {
   }
 }
 
-module.exports = sign;
+module.exports = { sign };

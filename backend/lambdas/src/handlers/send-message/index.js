@@ -4,7 +4,7 @@
  * Realizar uma chamada para o backend enviando o jwt + payload
  * o retorno dessa chamada será statusCode 202
  */
-const request = require("request");
+const request = require("request-promise");
 const jwt = require("../../../lib/ms-auth");
 const sqsParse = require("../../../lib/aws-parse-sqs");
 
@@ -23,7 +23,7 @@ async function main(event) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Content-Length": data.length,
+          "Content-Length": "data.length",
           "x-access-token": msJWT,
         },
         body: payload,
