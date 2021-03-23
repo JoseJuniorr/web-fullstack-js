@@ -99,7 +99,7 @@ async function getDomainSettings(domain: string) {
   } as DnsRecord;
 
   const verified =
-    response.VerificationAttributes[domain]["VerificationStatus"] === "STATUS";
+    response.VerificationAttributes[domain]["VerificationStatus"] === "Success";
 
   return { verified, dnsRecords: [dnsRecord] } as DnsSettings;
 }
