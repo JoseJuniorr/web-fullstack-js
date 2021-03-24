@@ -201,7 +201,7 @@ async function sendEmail(
     Destination: { ToAddresses: [toAddress] },
     FeedbackForwardingEmailAddress: fromAddress,
     FromEmailAddress: `${fromName} <${fromAddress}>`,
-    ReplyToAddress: [fromAddress],
+    ReplyToAddresses: [fromAddress],
   };
 
   const response = await ses.sendEmail(params).promise();
